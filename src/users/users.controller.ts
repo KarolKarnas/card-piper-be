@@ -10,7 +10,8 @@ import {
   ParseIntPipe,
   ValidationPipe,
 } from '@nestjs/common';
-import { Role } from 'src/utils/types';
+// import { Role } from 'src/utils/types';
+import { Role } from '@prisma/client';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';

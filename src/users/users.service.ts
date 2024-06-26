@@ -1,5 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { Role } from 'src/utils/types';
+// import { Role } from 'src/utils/types';
+import { Role } from '@prisma/client';
+
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 
