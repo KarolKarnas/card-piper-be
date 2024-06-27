@@ -9,21 +9,54 @@ generator client {
 }
 
 datasource db {
-  provider  = "postgresql"
-  url  	    = env("DATABASE_URL")
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
 }
 
 model Employee {
-  id  Int   @id @default(autoincrement())
-  name  String
-  email  String  @unique
-  role Role
+  id        Int      @id @default(autoincrement())
+  name      String
+  email     String   @unique
+  role      Role
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+}
+
+model Quote {
+  id         Int      @id @default(autoincrement())
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  author     String?
+  text       String
+  origin     String?
+  popularity Int
+  tags       String[]
+
+  userId Int
+  user   User @relation(fields: [userId], references: [id])
+}
+
+model User {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  email     String   @unique
+  hash      String
+  role      UserRole
+
+  firstName String?
+  lastName  String?
+
+  quotes Quote[]
 }
 
 enum Role {
   INTERN
   ENGINEER
+  ADMIN
+}
+
+enum UserRole {
+  USER
   ADMIN
 }
