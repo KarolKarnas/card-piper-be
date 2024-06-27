@@ -7,19 +7,24 @@ import {
   // Patch,
   Post,
   Query,
+  UseGuards,
   // ParseIntPipe,
   // ValidationPipe,
 } from '@nestjs/common';
-import { Prisma, UserRole } from '@prisma/client';
+import { Prisma, User, UserRole } from '@prisma/client';
 import { UsersService } from './users.service';
+import { JwtGuard } from 'src/auth/guard';
+import { GetUser } from 'src/auth/decorator';
 
+//guard all endpoints
+@UseGuards(JwtGuard)
 @Controller('users') // /users
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
   @Get('me')
-  getMe() {
-    return 'User Info';
+  getMe(@GetUser() user: User) {
+    return user;
   }
 
   @Get() // GET /users or /users?role=value
@@ -32,6 +37,7 @@ export class UsersController {
   //   return this.usersService.findOne(id);
   // }
 
+  //remove???
   @Post() // POST /users
   create(@Body() createUserDto: Prisma.UserCreateInput) {
     return this.usersService.create(createUserDto);
