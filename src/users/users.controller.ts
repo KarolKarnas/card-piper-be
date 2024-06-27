@@ -17,6 +17,11 @@ import { UsersService } from './users.service';
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
+  @Get('me')
+  getMe() {
+    return 'User Info';
+  }
+
   @Get() // GET /users or /users?role=value
   findAll(@Query('role') role?: UserRole) {
     return this.usersService.findAll(role);
