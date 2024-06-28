@@ -31,21 +31,18 @@ export class UsersService {
   //   return user;
   // }
 
-  create(createUserDto: Prisma.UserCreateInput) {
+  async create(createUserDto: Prisma.UserCreateInput) {
     return this.databaseService.user.create({ data: createUserDto });
   }
 
-  // update(id: number, updatedUserDto: UpdateUserDto) {
-  //   this.users = this.users.map((user) => {
-  //     if (user.id === id) {
-  //       return { ...user, ...updatedUserDto };
-  //     }
-
-  //     return user;
-  //   });
-
-  //   return this.findOne(id);
-  // }
+  async update(id: number, updatedUserDto: Prisma.UserCreateInput) {
+    return this.databaseService.user.update({
+      where: {
+        id,
+      },
+      data: updatedUserDto,
+    });
+  }
 
   // delete(id: number) {
   //   const removedUser = this.findOne(id);
