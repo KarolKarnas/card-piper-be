@@ -1,26 +1,26 @@
-import { Injectable } from '@nestjs/common';
-// import { Role } from 'src/utils/types';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { Prisma, UserRole } from '@prisma/client';
 import { DatabaseService } from 'src/database/database.service';
-// import { User } from '@prisma/client';
 
 @Injectable()
 export class UsersService {
   constructor(private readonly databaseService: DatabaseService) {}
 
-  findAll(role?: UserRole) {
-    console.log(role);
-    console.log(this.databaseService.user);
-    // if (role) {
-    //   const roles = this.databaseService.user.filter(
-    //     (user) => user.role === role,
-    //   );
-    //   if (roles.length === 0) {
-    //     throw new NotFoundException(`User "${role}" Role Not Found`);
-    //   }
-    //   return roles;
-    // }
-    // return this.users;
+  async findAll(role?: UserRole) {
+    if (role) {
+      const usersWithRoles = await this.databaseService.user.findMany({
+        where: {
+          role: role,
+        },
+      });
+      if (usersWithRoles.length === 0) {
+        throw new NotFoundException(`User "${role}" Role Not Found`);
+      }
+      return usersWithRoles;
+    } else {
+      const users = await this.databaseService.user.findMany();
+      return users;
+    }
   }
 
   // findOne(id: number) {

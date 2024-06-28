@@ -28,8 +28,13 @@ export class UsersController {
   }
 
   @Get() // GET /users or /users?role=value
-  findAll(@Query('role') role?: UserRole) {
-    return this.usersService.findAll(role);
+  findAll(@GetUser() user: User, @Query('role') role?: UserRole) {
+    if (user.role === 'ADMIN') {
+      ('admin');
+      return this.usersService.findAll(role);
+    } else {
+      return { message: 'Sorry, you need to be an admin' };
+    }
   }
 
   // @Get(':id') // GET /users/:id
@@ -56,3 +61,15 @@ export class UsersController {
   //   return this.usersService.delete(id);
   // }
 }
+
+// ___________
+
+// @Get() // GET /users or /users?role=value
+// findAll(@GetUser() user: User, @Query('role') role?: UserRole) {
+//   if (user.role === 'ADMIN') {
+//     ('admin');
+//     return this.usersService.findAll(role);
+//   } else {
+//     return { message: 'Sorry, you need to be an admin' };
+//   }
+// }
