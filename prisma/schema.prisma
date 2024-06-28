@@ -22,6 +22,20 @@ model Employee {
   updatedAt DateTime @updatedAt
 }
 
+model FavoriteQuote {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Define the relationship to User
+  user   User @relation(fields: [userId], references: [id])
+  userId Int
+
+  // Define the relationship to Quote
+  quote   Quote @relation(fields: [quoteId], references: [id])
+  quoteId Int
+}
+
 model Quote {
   id         Int      @id @default(autoincrement())
   createdAt  DateTime @default(now())
@@ -32,8 +46,7 @@ model Quote {
   popularity Int
   tags       String[]
 
-  userId Int
-  user   User @relation(fields: [userId], references: [id])
+  favoriteQuotes FavoriteQuote[]
 }
 
 model User {
@@ -47,7 +60,7 @@ model User {
   firstName String?
   lastName  String?
 
-  quotes Quote[]
+  favoritedBy FavoriteQuote[]
 }
 
 enum Role {
