@@ -1,6 +1,6 @@
 import { Controller, Delete, Post, UseGuards } from '@nestjs/common';
 import { DatabaseService } from './database.service';
-import { AdminGuard } from 'src/auth/guard/admin.guard';
+import { AdminGuard } from 'src/auth/guard';
 
 @UseGuards(AdminGuard)
 @Controller('database') // /users

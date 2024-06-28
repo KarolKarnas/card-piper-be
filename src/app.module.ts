@@ -8,8 +8,8 @@ import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
 import { APP_GUARD } from '@nestjs/core';
 import { MyLoggerModule } from './my-logger/my-logger.module';
 import { AuthModule } from './auth/auth.module';
-import { QuotesModule } from './quotes/quotes.module';
 import { ConfigModule } from '@nestjs/config';
+import { QuotesModule } from './quotes/quotes.module';
 
 @Module({
   imports: [
@@ -20,12 +20,12 @@ import { ConfigModule } from '@nestjs/config';
     UsersModule,
     DatabaseModule,
     EmployeesModule,
+    QuotesModule,
     ThrottlerModule.forRoot([
       { name: 'short', ttl: 1000, limit: 3 },
       { name: 'long', ttl: 60000, limit: 100 },
     ]),
     MyLoggerModule,
-    QuotesModule,
   ],
   controllers: [AppController],
   providers: [

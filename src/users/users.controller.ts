@@ -15,6 +15,7 @@ import { Prisma, User, UserRole } from '@prisma/client';
 import { UsersService } from './users.service';
 import { JwtGuard } from 'src/auth/guard';
 import { GetUser } from 'src/auth/decorator';
+import { AdminGuard } from 'src/auth/guard';
 
 //guard all endpoints
 @UseGuards(JwtGuard)
@@ -26,15 +27,10 @@ export class UsersController {
   getMe(@GetUser() user: User) {
     return user;
   }
-
+  @UseGuards(AdminGuard)
   @Get() // GET /users or /users?role=value
-  findAll(@GetUser() user: User, @Query('role') role?: UserRole) {
-    if (user.role === 'ADMIN') {
-      ('admin');
-      return this.usersService.findAll(role);
-    } else {
-      return { message: 'Sorry, you need to be an admin' };
-    }
+  findAll(@Query('role') role?: UserRole) {
+    return this.usersService.findAll(role);
   }
 
   // @Get(':id') // GET /users/:id
