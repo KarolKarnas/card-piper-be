@@ -1,8 +1,10 @@
+commands.md
+/src/database/database_secret
+
 # compiled output
 /dist
 /node_modules
 /build
-/src/database/database_secret
 
 # Logs
 logs
@@ -38,6 +40,8 @@ lerna-debug.log*
 
 # dotenv environment variable files
 .env
+.env.dev
+.env.test
 .env.development.local
 .env.test.local
 .env.production.local

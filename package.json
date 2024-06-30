@@ -6,10 +6,25 @@
   "private": true,
   "license": "UNLICENSED",
   "scripts": {
+    "prisma:prod:deploy": "prisma migrate deploy",
+
+    "prisma:dev:deploy": "dotenv -e .env.dev -- prisma migrate deploy",
+    "db:dev:rm": "docker compose rm dev-db -s -f -v",
+    "db:dev:up": "docker compose up dev-db -d",
+    "db:dev:restart": "npm run db:dev:rm && npm run db:dev:up && sleep 1 && npm run prisma:dev:deploy",
+    "studio:dev": "dotenv -e .env.dev -- npx prisma studio",
+    
+    "prisma:test:deploy": "dotenv -e .env.test -- prisma migrate deploy",
+    "db:test:rm": "docker compose rm test-db -s -f -v",
+    "db:test:up": "docker compose up test-db -d",
+    "db:test:restart": "npm run db:test:rm && npm run db:test:up && sleep 1 && npm run prisma:test:deploy",
+    "studio:test": "dotenv -e .env.test -- npx prisma studio",
+
     "build": "nest build",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
     "start": "nest start",
-    "start:dev": "nest start --watch",
+    "start:dev": "dotenv -e .env.dev -- nest start --watch",
+    "start:local:prod": "nest start --watch",
     "start:debug": "nest start --debug --watch",
     "start:prod": "node dist/main",
     "lint": "eslint \"{src,apps,libs,test}/**/*.ts\" --fix",
@@ -17,7 +32,8 @@
     "test:watch": "jest --watch",
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
-    "test:e2e": "jest --config ./test/jest-e2e.json"
+    "pretest:e2e": "npm run db:test:restart",
+    "test:e2e": "dotenv -e .env.test -- jest --watch --no-cache --config ./test/jest-e2e.json"
   },
   "dependencies": {
     "@nestjs/common": "^10.0.0",
@@ -48,6 +64,7 @@
     "@types/supertest": "^6.0.0",
     "@typescript-eslint/eslint-plugin": "^6.0.0",
     "@typescript-eslint/parser": "^6.0.0",
+    "dotenv-cli": "^7.4.2",
     "eslint": "^8.42.0",
     "eslint-config-prettier": "^9.0.0",
     "eslint-plugin-prettier": "^5.0.0",

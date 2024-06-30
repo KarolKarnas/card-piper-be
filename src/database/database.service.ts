@@ -19,7 +19,7 @@ export class DatabaseService extends PrismaClient {
     return this.$transaction([
       this.user.deleteMany({
         where: {
-          NOT: [{ id: 27 }, { id: 28 }],
+          NOT: [{ email: 'admin@admin.com' }, { email: 'user@user.com' }],
         },
       }),
     ]);
