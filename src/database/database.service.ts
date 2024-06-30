@@ -15,6 +15,14 @@ export class DatabaseService extends PrismaClient {
     });
   }
 
+  async cleanDb() {
+    return this.$transaction([
+      this.favoriteQuote.deleteMany(),
+      this.user.deleteMany(),
+      this.quote.deleteMany(),
+    ]);
+  }
+
   async deleteUsers() {
     return this.$transaction([
       this.user.deleteMany({
@@ -26,7 +34,7 @@ export class DatabaseService extends PrismaClient {
   }
 
   async populateQuotes() {
-    return this.$transaction([this.quote.createMany({ data: quotesData })]);
+    return this.quote.createMany({ data: quotesData });
   }
 
   async deleteQuotes() {

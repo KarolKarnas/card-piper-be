@@ -13,9 +13,9 @@ import {
 } from '@nestjs/common';
 import { Prisma, User, UserRole } from '@prisma/client';
 import { UsersService } from './users.service';
-import { JwtGuard } from 'src/auth/guard';
-import { GetUser } from 'src/auth/decorator';
-import { AdminGuard } from 'src/auth/guard';
+import { JwtGuard } from '../auth/guard';
+import { GetUser } from '../auth/decorator';
+import { AdminGuard } from '../auth/guard';
 
 //guard all endpoints
 @UseGuards(JwtGuard)
