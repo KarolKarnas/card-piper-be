@@ -16,10 +16,14 @@ export class AuthService {
 
   async signup(signupDto: SignupDto) {
     const hash = await argon2.hash(signupDto.password);
+    const adminSecret = Boolean(this.config.get('ADMIN_SECRET'));
 
     try {
       const user = await this.databaseService.user.create({
-        data: { email: signupDto.email, hash, role: 'USER' },
+        data:
+          adminSecret && signupDto.email === 'admin@admin.com'
+            ? { email: signupDto.email, hash, role: 'ADMIN' }
+            : { email: signupDto.email, hash, role: 'USER' },
       });
 
       return this.signToken(user.id, user.email);
