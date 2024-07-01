@@ -64,7 +64,6 @@ export class UsersService {
         'You do not have permission to delete this user',
       );
     }
-
     return this.databaseService.user.delete({
       where: {
         id,
