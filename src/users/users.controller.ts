@@ -1,14 +1,19 @@
 import {
   Body,
   Controller,
-  // Delete,
+  Delete,
   Get,
-  // Param,
+  Param,
   // Patch,
   Post,
   Query,
   UseGuards,
-  // ParseIntPipe,
+  ParseIntPipe,
+  HttpCode,
+  HttpStatus,
+  // Req,
+  // NotFoundException,
+  // ForbiddenException,
   // ValidationPipe,
 } from '@nestjs/common';
 import { Prisma, User, UserRole } from '@prisma/client';
@@ -52,10 +57,11 @@ export class UsersController {
   //   return this.usersService.update(id, updateUserDto);
   // }
 
-  // @Delete(':id') // GET /users/:id
-  // delete(@Param('id', ParseIntPipe) id: number) {
-  //   return this.usersService.delete(id);
-  // }
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @Delete(':id') // GET /users/:id
+  delete(@Param('id', ParseIntPipe) id: number, @GetUser() user: User) {
+    return this.usersService.delete(id, user);
+  }
 }
 
 // ___________

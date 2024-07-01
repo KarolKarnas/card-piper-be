@@ -1,5 +1,9 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
-import { Prisma, UserRole } from '@prisma/client';
+import {
+  ForbiddenException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
+import { Prisma, User, UserRole } from '@prisma/client';
 import { DatabaseService } from '../database/database.service';
 
 @Injectable()
@@ -44,11 +48,27 @@ export class UsersService {
     });
   }
 
-  // delete(id: number) {
-  //   const removedUser = this.findOne(id);
+  async delete(id: number, user: User) {
+    const currentUser = this.databaseService.user.findUnique({
+      where: {
+        id: id,
+      },
+    });
 
-  //   this.users = this.users.filter((user) => user.id !== id);
+    if (!currentUser) {
+      throw new NotFoundException(`User with id ${id} not found`);
+    }
 
-  //   return removedUser;
-  // }
+    if (user.id !== id) {
+      throw new ForbiddenException(
+        'You do not have permission to delete this user',
+      );
+    }
+
+    return this.databaseService.user.delete({
+      where: {
+        id,
+      },
+    });
+  }
 }

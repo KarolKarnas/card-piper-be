@@ -7,6 +7,8 @@ import {
   Param,
   Delete,
   UseGuards,
+  HttpCode,
+  HttpStatus,
   // ParseIntPipe,
 } from '@nestjs/common';
 import { FavoriteQuoteService } from './favorite-quote.service';
@@ -30,6 +32,7 @@ export class FavoriteQuoteController {
   //   return this.favoriteQuoteService.findOne(Number(id));
   // }
 
+  @HttpCode(HttpStatus.NO_CONTENT)
   @Delete(':id')
   remove(@Param('id') id: string) {
     return this.favoriteQuoteService.remove(Number(id));

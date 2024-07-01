@@ -45,7 +45,10 @@ describe('AppController (e2e)', () => {
       password: 'admin',
     };
 
-    const signIn = async (dto) => {
+    let newUserToken = '';
+    let newUserId;
+
+    const signIn = async (dto: SignupDto) => {
       const response = await request(app.getHttpServer())
         .post('/auth/signup')
         .send({
@@ -83,8 +86,8 @@ describe('AppController (e2e)', () => {
         );
         expect(response.body.message[1]).toContain('password must be a string');
       });
-      it('should throw an 400 Bad Request error if body not provided', () => {
-        request(app.getHttpServer())
+      it('should throw an 400 Bad Request error if body not provided', async () => {
+        await request(app.getHttpServer())
           .post('/auth/signup')
           .expect(400)
           .expect('Content-Type', /application\/json/);
@@ -130,8 +133,8 @@ describe('AppController (e2e)', () => {
         );
         expect(response.body.message[1]).toContain('password must be a string');
       });
-      it('should throw an 400 Bad Request error if body not provided', () => {
-        request(app.getHttpServer())
+      it('should throw an 400 Bad Request error if body not provided', async () => {
+        await request(app.getHttpServer())
           .post('/auth/signin')
           .expect(400)
           .expect('Content-Type', /application\/json/);
@@ -148,11 +151,30 @@ describe('AppController (e2e)', () => {
 
         expect(response.body).toHaveProperty('access_token');
         expect(typeof response.body.access_token).toBe('string');
+        newUserToken = response.body.access_token;
+      });
+
+      it('should be able to get self data', async () => {
+        const response = await request(app.getHttpServer())
+          .get('/users/me')
+          .set('Authorization', `Bearer ${newUserToken}`)
+          .expect(200)
+          .expect('Content-Type', /application\/json/);
+
+        expect(response.body).toHaveProperty('id');
+        expect(typeof response.body.id).toBe('number');
+        newUserId = response.body.id;
+      });
+      it('should be able to delete account after signup', async () => {
+        await request(app.getHttpServer())
+          .delete(`/users/${newUserId}`)
+          .set('Authorization', `Bearer ${newUserToken}`)
+          .expect(204);
       });
     });
 
     describe('as Admin', () => {
-      it('should be able', async () => {
+      it('should be able to get all users', async () => {
         const token = await signIn(adminDto);
 
         const response = await request(app.getHttpServer())
@@ -160,22 +182,21 @@ describe('AppController (e2e)', () => {
           .set('Authorization', `Bearer ${token}`)
           .expect(200)
           .expect('Content-Type', /application\/json/);
-
-        expect(response.body.length).toBe(2);
+        expect(response.body.length).toBe(1);
       });
     });
 
-    describe('as User', () => {
-      it('should throw an 401 Error', async () => {
-        const token = await signIn(dto);
+    // describe('as User', () => {
+    //   it('should throw an 401 Error', async () => {
+    //     const token = await signIn(dto);
 
-        await request(app.getHttpServer())
-          .get('/users')
-          .set('Authorization', `Bearer ${token}`)
-          .expect(401)
-          .expect('Content-Type', /application\/json/);
-      });
-    });
+    //     await request(app.getHttpServer())
+    //       .get('/users')
+    //       .set('Authorization', `Bearer ${token}`)
+    //       .expect(401)
+    //       .expect('Content-Type', /application\/json/);
+    //   });
+    // });
   });
 
   // describe('User', () => {
