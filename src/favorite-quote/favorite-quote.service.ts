@@ -38,6 +38,25 @@ export class FavoriteQuoteService {
     }
   }
 
+  async remove(id: number) {
+    try {
+      return await this.databaseService.favoriteQuote.delete({
+        where: {
+          id: id,
+        },
+      });
+    } catch (error) {
+      if (error instanceof Prisma.PrismaClientKnownRequestError) {
+        if (error.code === 'P2025') {
+          throw new ConflictException(
+            'This quote has been already unfavored for this user',
+          );
+        }
+      }
+      throw error;
+    }
+  }
+
   async findAllQuotes(userId: number) {
     try {
       return await this.databaseService.favoriteQuote.findMany({
@@ -86,9 +105,5 @@ export class FavoriteQuoteService {
 
   // update(id: number, updateFavoriteQuoteDto: UpdateFavoriteQuoteDto) {
   //   return `This action updates a #${id} favoriteQuote`;
-  // }
-
-  // remove(id: number) {
-  //   return `This action removes a #${id} favoriteQuote`;
   // }
 }

@@ -28,7 +28,7 @@ model FavoriteQuote {
   updatedAt DateTime @updatedAt
 
   // Define the relationship to User
-  user   User @relation(fields: [userId], references: [id])
+  user   User @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId Int
 
   // Define the relationship to Quote

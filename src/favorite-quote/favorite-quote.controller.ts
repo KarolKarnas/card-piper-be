@@ -5,7 +5,7 @@ import {
   Body,
   // Patch,
   Param,
-  // Delete,
+  Delete,
   UseGuards,
   // ParseIntPipe,
 } from '@nestjs/common';
@@ -30,6 +30,11 @@ export class FavoriteQuoteController {
   //   return this.favoriteQuoteService.findOne(Number(id));
   // }
 
+  @Delete(':id')
+  remove(@Param('id') id: string) {
+    return this.favoriteQuoteService.remove(Number(id));
+  }
+
   @Get('user/:userId')
   findAllQuotes(@Param('userId') userId: string) {
     return this.favoriteQuoteService.findAllQuotes(Number(userId));
@@ -46,10 +51,5 @@ export class FavoriteQuoteController {
   //   @Body() updateFavoriteQuoteDto: UpdateFavoriteQuoteDto,
   // ) {
   //   return this.favoriteQuoteService.update(+id, updateFavoriteQuoteDto);
-  // }
-
-  // @Delete(':id')
-  // remove(@Param('id') id: string) {
-  //   return this.favoriteQuoteService.remove(+id);
   // }
 }
