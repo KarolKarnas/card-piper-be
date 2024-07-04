@@ -12,7 +12,10 @@ export class QuotesService {
     });
   }
 
-  async findAll() {
+  async findAll(skip?: number, take?: number) {
+    if (skip && take) {
+      return this.databaseService.quote.findMany({ skip: skip, take: take });
+    }
     return this.databaseService.quote.findMany();
   }
 

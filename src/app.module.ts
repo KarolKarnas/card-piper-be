@@ -10,6 +10,7 @@ import { AuthModule } from './auth/auth.module';
 import { ConfigModule } from '@nestjs/config';
 import { QuotesModule } from './quotes/quotes.module';
 import { FavoriteQuoteModule } from './favorite-quote/favorite-quote.module';
+import { AuthorsModule } from './authors/authors.module';
 
 @Module({
   imports: [
@@ -26,6 +27,7 @@ import { FavoriteQuoteModule } from './favorite-quote/favorite-quote.module';
     ]),
     MyLoggerModule,
     FavoriteQuoteModule,
+    AuthorsModule,
   ],
   controllers: [AppController],
   providers: [

@@ -6,14 +6,16 @@ import {
   Patch,
   Param,
   Delete,
-  UseGuards,
+  Query,
+  ParseIntPipe,
+  // UseGuards,
 } from '@nestjs/common';
 import { QuotesService } from './quotes.service';
 import { Prisma } from '@prisma/client';
-import { JwtGuard } from '../auth/guard';
-import { AdminGuard } from '../auth/guard';
+// import { JwtGuard } from '../auth/guard';
+// import { AdminGuard } from '../auth/guard';
 
-@UseGuards(JwtGuard)
+// @UseGuards(JwtGuard)
 @Controller('quotes')
 export class QuotesController {
   constructor(private readonly quotesService: QuotesService) {}
@@ -24,8 +26,11 @@ export class QuotesController {
   }
 
   @Get()
-  findAll() {
-    return this.quotesService.findAll();
+  findAll(
+    @Query('skip', ParseIntPipe) skip?: number,
+    @Query('take', ParseIntPipe) take?: number,
+  ) {
+    return this.quotesService.findAll(skip, take);
   }
 
   @Get(':id')
@@ -41,7 +46,7 @@ export class QuotesController {
     return this.quotesService.update(+id, updateQuoteDto);
   }
 
-  @UseGuards(AdminGuard)
+  // @UseGuards(AdminGuard)
   @Delete(':id')
   remove(@Param('id') id: string) {
     return this.quotesService.remove(+id);
