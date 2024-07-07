@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { Prisma, PrismaClient } from '@prisma/client';
 import { ConfigService } from '@nestjs/config';
-import { quotesData } from './database_secret/data';
+import { quotesData, bookData } from './database_secret/data';
 
 @Injectable()
 export class DatabaseService extends PrismaClient<
@@ -16,12 +16,12 @@ export class DatabaseService extends PrismaClient<
       //   { emit: 'stdout', level: 'warn' },
       //   { emit: 'stdout', level: 'error' },
       // ],
-      log: [
-        {
-          emit: 'event',
-          level: 'query',
-        },
-      ],
+      // log: [
+      //   {
+      //     emit: 'event',
+      //     level: 'query',
+      //   },
+      // ],
       datasources: {
         db: {
           url: config.get('DATABASE_URL'),
@@ -66,7 +66,9 @@ export class DatabaseService extends PrismaClient<
   }
 
   async populateDB() {
-    const authors = quotesData.map((quote) => quote.author);
+    const quoteAuthors = quotesData.map((quote) => quote.author);
+    const bookAuthors = bookData.map((book) => book.author);
+    const authors = [...quoteAuthors, ...bookAuthors];
     const uniqueAuthors = [...new Set(authors)];
     const authorsObjects = uniqueAuthors.map((author) => ({
       name: author,
@@ -90,9 +92,40 @@ export class DatabaseService extends PrismaClient<
 
     console.log(authorMap);
 
+    const bookPromises = bookData.map((book) =>
+      this.book.upsert({
+        where: {
+          title_authorId: {
+            title: book.title,
+            authorId: authorMap[book.author],
+          },
+        },
+        update: {},
+        create: {
+          title: book.title,
+          rating: book.rating,
+          popularity: book.popularity,
+          description: book.description,
+          genres: { set: book.genres }, // Assuming genres is an array of strings
+          authorId: authorMap[book.author],
+          date: new Date(book.date),
+          image: book.image,
+        },
+      }),
+    );
+    const createdBooks = await Promise.all(bookPromises);
+
+    // Create a map to easily get the bookId by title
+    const bookMap = createdBooks.reduce((acc, book) => {
+      acc[book.title] = book.id;
+      return acc;
+    }, {});
+
+    console.log(bookMap);
+
     // Create quotes with authorId
-    const quotePromises = quotesData.map((quote) => {
-      return this.quote.upsert({
+    const quotePromises = quotesData.map((quote) =>
+      this.quote.upsert({
         where: {
           text_authorId: {
             text: quote.text,
@@ -104,11 +137,17 @@ export class DatabaseService extends PrismaClient<
           text: quote.text,
           origin: quote.origin,
           popularity: quote.popularity,
-          tags: quote.tags,
-          authorId: authorMap[quote.author],
+          tags: { set: quote.tags }, // Assuming tags is an array of strings
+          author: { connect: { id: authorMap[quote.author] } },
+          book:
+            quote.origin && bookMap[quote.origin]
+              ? { connect: { id: bookMap[quote.origin] } }
+              : undefined,
         },
-      });
-    });
-    return await Promise.all(quotePromises);
+      }),
+    );
+    await Promise.all(quotePromises);
+
+    return { message: 'DATABASE POPULATED SIR!' };
   }
 }

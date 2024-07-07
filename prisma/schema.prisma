@@ -38,8 +38,10 @@ model Quote {
   popularity     Int
   tags           String[]
   favoriteQuotes FavoriteQuote[]
-  author         Author         @relation(fields: [authorId], references: [id])
+  author         Author          @relation(fields: [authorId], references: [id])
+  book           Book?           @relation(fields: [bookId], references: [id])
   authorId       Int
+  bookId         Int?
 
   @@unique([text, authorId])
 }
@@ -64,6 +66,23 @@ model Author {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   quotes    Quote[]
+  Book      Book[]
+}
+
+model Book {
+  id          Int      @id @default(autoincrement())
+  title       String   @unique
+  author      Author   @relation(fields: [authorId], references: [id])
+  authorId    Int
+  rating      Float
+  popularity  Int
+  description String
+  genres     String[]
+  date        DateTime
+  image       String
+  Quote       Quote[]
+
+  @@unique([title, authorId])
 }
 
 enum UserRole {

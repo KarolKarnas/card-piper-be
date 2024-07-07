@@ -17,6 +17,10 @@ export class AuthorsService {
       where: {
         id,
       },
+      // include all quotes by author
+      include: {
+        quotes: true,
+      },
     });
   }
 

@@ -12,11 +12,9 @@ export class QuotesService {
     });
   }
 
-  async findAll(skip?: number, take?: number) {
-    if (skip && take) {
-      return this.databaseService.quote.findMany({ skip: skip, take: take });
-    }
-    return this.databaseService.quote.findMany();
+  async findAll(skip: number, take: number) {
+    if (skip === 0 && take === 0) return this.databaseService.quote.findMany();
+    return this.databaseService.quote.findMany({ skip: skip, take: take });
   }
 
   async findOne(id: number) {

@@ -8,6 +8,7 @@ import {
   Delete,
   Query,
   ParseIntPipe,
+  DefaultValuePipe,
   // UseGuards,
 } from '@nestjs/common';
 import { QuotesService } from './quotes.service';
@@ -27,8 +28,8 @@ export class QuotesController {
 
   @Get()
   findAll(
-    @Query('skip', ParseIntPipe) skip?: number,
-    @Query('take', ParseIntPipe) take?: number,
+    @Query('skip', new DefaultValuePipe(0), ParseIntPipe) skip?: number,
+    @Query('take', new DefaultValuePipe(0), ParseIntPipe) take?: number,
   ) {
     return this.quotesService.findAll(skip, take);
   }
