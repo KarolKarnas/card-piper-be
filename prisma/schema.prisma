@@ -61,12 +61,21 @@ model User {
 }
 
 model Author {
-  id        Int      @id @default(autoincrement())
-  name      String   @unique
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  quotes    Quote[]
-  Book      Book[]
+  id         Int      @id @default(autoincrement())
+  name       String   @unique
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  quotes     Quote[]
+  Book       Book[]
+  bornPlace  String?
+  bornDate   String?
+  deathDate  String?
+  website    String?
+  genres     String[]
+  bio        String?
+  rating     Float?
+  popularity Int?
+  image      String?
 }
 
 model Book {
@@ -77,7 +86,7 @@ model Book {
   rating      Float
   popularity  Int
   description String
-  genres     String[]
+  genres      String[]
   date        DateTime
   image       String
   Quote       Quote[]

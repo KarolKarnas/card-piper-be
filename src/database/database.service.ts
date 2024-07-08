@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { Prisma, PrismaClient } from '@prisma/client';
 import { ConfigService } from '@nestjs/config';
-import { quotesData, bookData } from './database_secret/data';
+import { quotesData, bookData, authorData } from './database_secret/data';
 
 @Injectable()
 export class DatabaseService extends PrismaClient<
@@ -66,9 +66,11 @@ export class DatabaseService extends PrismaClient<
   }
 
   async populateDB() {
+    //extract unique authors
+    const authorNames = authorData.map((author) => author.name);
     const quoteAuthors = quotesData.map((quote) => quote.author);
     const bookAuthors = bookData.map((book) => book.author);
-    const authors = [...quoteAuthors, ...bookAuthors];
+    const authors = [...authorNames, ...quoteAuthors, ...bookAuthors];
     const uniqueAuthors = [...new Set(authors)];
     const authorsObjects = uniqueAuthors.map((author) => ({
       name: author,
@@ -90,7 +92,25 @@ export class DatabaseService extends PrismaClient<
       return acc;
     }, {});
 
-    console.log(authorMap);
+    // Update authors
+    const updateAuthorPromises = authorData.map((author) =>
+      this.author.update({
+        where: { name: author.name },
+        data: {
+          bornPlace: author.bornPlace,
+          bornDate: author.bornDate,
+          deathDate: author.deathDate,
+          website: author.website,
+          genres: author.genres,
+          bio: author.bio,
+          rating: author.rating,
+          popularity: author.popularity,
+          image: author.image,
+        },
+      }),
+    );
+
+    await Promise.all(updateAuthorPromises);
 
     const bookPromises = bookData.map((book) =>
       this.book.upsert({
@@ -121,7 +141,7 @@ export class DatabaseService extends PrismaClient<
       return acc;
     }, {});
 
-    console.log(bookMap);
+    // console.log(bookMap);
 
     // Create quotes with authorId
     const quotePromises = quotesData.map((quote) =>
