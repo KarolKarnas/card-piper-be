@@ -42,6 +42,7 @@ model Quote {
   book           Book?           @relation(fields: [bookId], references: [id])
   authorId       Int
   bookId         Int?
+  reactions      Reaction[]      @relation("QuoteReactions")
 
   @@unique([text, authorId])
 }
@@ -58,13 +59,14 @@ model User {
   lastName  String?
 
   favoritedBy FavoriteQuote[]
+  Reaction    Reaction[]
 }
 
 model Author {
-  id         Int      @id @default(autoincrement())
-  name       String   @unique
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
+  id         Int        @id @default(autoincrement())
+  name       String     @unique
+  createdAt  DateTime   @default(now())
+  updatedAt  DateTime   @updatedAt
   quotes     Quote[]
   Book       Book[]
   bornPlace  String?
@@ -76,12 +78,13 @@ model Author {
   rating     Float?
   popularity Int?
   image      String?
+  reactions  Reaction[] @relation("AuthorReactions")
 }
 
 model Book {
-  id          Int      @id @default(autoincrement())
-  title       String   @unique
-  author      Author   @relation(fields: [authorId], references: [id])
+  id          Int        @id @default(autoincrement())
+  title       String     @unique
+  author      Author     @relation(fields: [authorId], references: [id])
   authorId    Int
   rating      Float
   popularity  Int
@@ -90,6 +93,7 @@ model Book {
   date        DateTime
   image       String
   Quote       Quote[]
+  reactions   Reaction[] @relation("BookReactions")
 
   @@unique([title, authorId])
 }
@@ -97,4 +101,45 @@ model Book {
 enum UserRole {
   USER
   ADMIN
+}
+
+enum ReactionType {
+  LOVE
+  LIKE
+  DISLIKE
+  HATE
+}
+
+enum ReactionEntity {
+  AUTHOR
+  BOOK
+  QUOTE
+}
+
+model Reaction {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Define the relationship to User
+  user   User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId Int
+
+  // Define polymorphic relationships
+  quote   Quote? @relation("QuoteReactions", fields: [quoteId], references: [id])
+  quoteId Int?
+
+  book   Book? @relation("BookReactions", fields: [bookId], references: [id])
+  bookId Int?
+
+  author   Author? @relation("AuthorReactions", fields: [authorId], references: [id])
+  authorId Int?
+
+  // Define the reaction type
+  type   ReactionType
+  entity ReactionEntity
+
+  @@unique([userId, quoteId])
+  @@unique([userId, bookId])
+  @@unique([userId, authorId])
 }

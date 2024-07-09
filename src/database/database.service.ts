@@ -168,6 +168,25 @@ export class DatabaseService extends PrismaClient<
     );
     await Promise.all(quotePromises);
 
+    // const users = [
+    //   { email: 'admin@admin.com', password: 'admin' },
+    //   { email: 'user@user.com', password: 'user' },
+    //   { email: 'test@test.com', password: 'test' },
+    // ];
+
+    // const userPromises = users.map((user) =>
+    //   this.user.upsert({
+    //     where: {
+    //       email: user.email,
+    //     },
+    //     update: {},
+    //     create: {
+    //       email: user.email,
+    //       password: user.password,
+    //     },
+    //   }),
+    // );
+
     return { message: 'DATABASE POPULATED SIR!' };
   }
 }
