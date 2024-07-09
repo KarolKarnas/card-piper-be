@@ -59,7 +59,8 @@ model User {
   lastName  String?
 
   favoritedBy FavoriteQuote[]
-  Reaction    Reaction[]
+  reaction    Reaction[]
+  
 }
 
 model Author {
