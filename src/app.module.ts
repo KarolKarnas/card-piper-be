@@ -12,6 +12,7 @@ import { QuotesModule } from './quotes/quotes.module';
 import { FavoriteQuoteModule } from './favorite-quote/favorite-quote.module';
 import { AuthorsModule } from './authors/authors.module';
 import { BooksModule } from './books/books.module';
+import { ReactionModule } from './reaction/reaction.module';
 
 @Module({
   imports: [
@@ -30,6 +31,7 @@ import { BooksModule } from './books/books.module';
     FavoriteQuoteModule,
     AuthorsModule,
     BooksModule,
+    ReactionModule,
   ],
   controllers: [AppController],
   providers: [
