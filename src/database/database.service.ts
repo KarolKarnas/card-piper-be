@@ -66,6 +66,9 @@ export class DatabaseService extends PrismaClient<
   }
 
   async populateDB() {
+    const getRandomNumber = () => {
+      return Math.random() * 2 - 1; // Generates a number in range [-1, 1)
+    };
     //extract unique authors
     const authorNames = authorData.map((author) => author.name);
     const quoteAuthors = quotesData.map((quote) => quote.author);
@@ -93,8 +96,15 @@ export class DatabaseService extends PrismaClient<
     }, {});
 
     // Update authors
-    const updateAuthorPromises = authorData.map((author) =>
-      this.author.update({
+    const updateAuthorPromises = authorData.map((author) => {
+      const randomPersonality = {
+        extroversionIntroversion: getRandomNumber(),
+        sensingIntuition: getRandomNumber(),
+        thinkingFeeling: getRandomNumber(),
+        judgingPerceiving: getRandomNumber(),
+        assertiveTurbulent: getRandomNumber(),
+      };
+      return this.author.update({
         where: { name: author.name },
         data: {
           bornPlace: author.bornPlace,
@@ -106,14 +116,24 @@ export class DatabaseService extends PrismaClient<
           rating: author.rating,
           popularity: author.popularity,
           image: author.image,
+          personality: {
+            create: randomPersonality,
+          },
         },
-      }),
-    );
+      });
+    });
 
     await Promise.all(updateAuthorPromises);
 
-    const bookPromises = bookData.map((book) =>
-      this.book.upsert({
+    const bookPromises = bookData.map((book) => {
+      const randomPersonality = {
+        extroversionIntroversion: getRandomNumber(),
+        sensingIntuition: getRandomNumber(),
+        thinkingFeeling: getRandomNumber(),
+        judgingPerceiving: getRandomNumber(),
+        assertiveTurbulent: getRandomNumber(),
+      };
+      return this.book.upsert({
         where: {
           title_authorId: {
             title: book.title,
@@ -127,12 +147,13 @@ export class DatabaseService extends PrismaClient<
           popularity: book.popularity,
           description: book.description,
           genres: { set: book.genres }, // Assuming genres is an array of strings
-          authorId: authorMap[book.author],
+          author: { connect: { id: authorMap[book.author] } },
           date: new Date(book.date),
           image: book.image,
+          personality: { create: randomPersonality },
         },
-      }),
-    );
+      });
+    });
     const createdBooks = await Promise.all(bookPromises);
 
     // Create a map to easily get the bookId by title
@@ -141,11 +162,17 @@ export class DatabaseService extends PrismaClient<
       return acc;
     }, {});
 
-    // console.log(bookMap);
-
     // Create quotes with authorId
-    const quotePromises = quotesData.map((quote) =>
-      this.quote.upsert({
+    const quotePromises = quotesData.map((quote) => {
+      const randomPersonality = {
+        extroversionIntroversion: getRandomNumber(),
+        sensingIntuition: getRandomNumber(),
+        thinkingFeeling: getRandomNumber(),
+        judgingPerceiving: getRandomNumber(),
+        assertiveTurbulent: getRandomNumber(),
+      };
+
+      return this.quote.upsert({
         where: {
           text_authorId: {
             text: quote.text,
@@ -163,9 +190,12 @@ export class DatabaseService extends PrismaClient<
             quote.origin && bookMap[quote.origin]
               ? { connect: { id: bookMap[quote.origin] } }
               : undefined,
+          personality: {
+            create: randomPersonality,
+          },
         },
-      }),
-    );
+      });
+    });
     await Promise.all(quotePromises);
 
     // const users = [

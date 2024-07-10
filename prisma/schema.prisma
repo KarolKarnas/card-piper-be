@@ -29,6 +29,21 @@ model FavoriteQuote {
   @@unique([userId, quoteId])
 }
 
+model Personality {
+  id                       Int      @id @default(autoincrement())
+  createdAt                DateTime @default(now())
+  updatedAt                DateTime @updatedAt
+  extroversionIntroversion Float
+  sensingIntuition         Float
+  thinkingFeeling          Float
+  judgingPerceiving        Float
+  assertiveTurbulent       Float
+  quotes                   Quote[]
+  books                    Book[]
+  authors                  Author[]
+  users                    User[]
+}
+
 model Quote {
   id             Int             @id @default(autoincrement())
   createdAt      DateTime        @default(now())
@@ -43,6 +58,8 @@ model Quote {
   authorId       Int
   bookId         Int?
   reactions      Reaction[]      @relation("QuoteReactions")
+  personality    Personality?    @relation(fields: [personalityId], references: [id])
+  personalityId  Int?
 
   @@unique([text, authorId])
 }
@@ -60,41 +77,47 @@ model User {
 
   favoritedBy FavoriteQuote[]
   reaction    Reaction[]
-  
+
+  personality   Personality @relation(fields: [personalityId], references: [id])
+  personalityId Int
 }
 
 model Author {
-  id         Int        @id @default(autoincrement())
-  name       String     @unique
-  createdAt  DateTime   @default(now())
-  updatedAt  DateTime   @updatedAt
-  quotes     Quote[]
-  Book       Book[]
-  bornPlace  String?
-  bornDate   String?
-  deathDate  String?
-  website    String?
-  genres     String[]
-  bio        String?
-  rating     Float?
-  popularity Int?
-  image      String?
-  reactions  Reaction[] @relation("AuthorReactions")
+  id            Int          @id @default(autoincrement())
+  name          String       @unique
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+  quotes        Quote[]
+  Book          Book[]
+  bornPlace     String?
+  bornDate      String?
+  deathDate     String?
+  website       String?
+  genres        String[]
+  bio           String?
+  rating        Float?
+  popularity    Int?
+  image         String?
+  reactions     Reaction[]   @relation("AuthorReactions")
+  personality   Personality? @relation(fields: [personalityId], references: [id])
+  personalityId Int?
 }
 
 model Book {
-  id          Int        @id @default(autoincrement())
-  title       String     @unique
-  author      Author     @relation(fields: [authorId], references: [id])
-  authorId    Int
-  rating      Float
-  popularity  Int
-  description String
-  genres      String[]
-  date        DateTime
-  image       String
-  Quote       Quote[]
-  reactions   Reaction[] @relation("BookReactions")
+  id            Int          @id @default(autoincrement())
+  title         String       @unique
+  author        Author       @relation(fields: [authorId], references: [id])
+  authorId      Int
+  rating        Float
+  popularity    Int
+  description   String
+  genres        String[]
+  date          DateTime
+  image         String
+  personality   Personality? @relation(fields: [personalityId], references: [id])
+  personalityId Int?
+  Quote         Quote[]
+  reactions     Reaction[]   @relation("BookReactions")
 
   @@unique([title, authorId])
 }
@@ -137,8 +160,10 @@ model Reaction {
   authorId Int?
 
   // Define the reaction type
-  type   ReactionType
-  entity ReactionEntity
+  favorite Boolean
+  list     Boolean
+  type     ReactionType
+  entity   ReactionEntity
 
   @@unique([userId, quoteId])
   @@unique([userId, bookId])
