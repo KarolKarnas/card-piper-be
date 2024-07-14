@@ -19,11 +19,32 @@ export class AuthService {
     const adminSecret = Boolean(this.config.get('ADMIN_SECRET'));
 
     try {
+      const zeroPersonality = {
+        extroversionIntroversion: 0,
+        sensingIntuition: 0,
+        thinkingFeeling: 0,
+        judgingPerceiving: 0,
+        assertiveTurbulent: 0,
+      };
       const user = await this.databaseService.user.create({
         data:
           adminSecret && signupDto.email === 'admin@admin.com'
-            ? { email: signupDto.email, hash, role: 'ADMIN' }
-            : { email: signupDto.email, hash, role: 'USER' },
+            ? {
+                email: signupDto.email,
+                hash,
+                role: 'ADMIN',
+                personality: {
+                  create: zeroPersonality,
+                },
+              }
+            : {
+                email: signupDto.email,
+                hash,
+                role: 'USER',
+                personality: {
+                  create: zeroPersonality,
+                },
+              },
       });
 
       return this.signToken(user.id, user.email);

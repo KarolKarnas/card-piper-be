@@ -42,8 +42,16 @@ export class ReactionController {
     @Param('userId') userId: string,
     @Query('type') type?: ReactionType,
     @Query('entity') entity?: ReactionEntity,
+    @Query('favorite') favorite?: string,
+    @Query('list') list?: string,
   ) {
-    return this.reactionService.findAllReactions(Number(userId), type, entity);
+    return this.reactionService.findAllReactions(
+      Number(userId),
+      type,
+      entity,
+      favorite,
+      list,
+    );
   }
 
   // @Get('quote/:quoteId')
