@@ -1,7 +1,11 @@
 import { Injectable } from '@nestjs/common';
 import { Prisma, PrismaClient } from '@prisma/client';
 import { ConfigService } from '@nestjs/config';
-import { quotesData, bookData, authorData } from './database_secret/data';
+import {
+  quotesData,
+  bookDataCharacters,
+  authorData,
+} from './database_secret/data';
 
 @Injectable()
 export class DatabaseService extends PrismaClient<
@@ -72,12 +76,61 @@ export class DatabaseService extends PrismaClient<
     //extract unique authors
     const authorNames = authorData.map((author) => author.name);
     const quoteAuthors = quotesData.map((quote) => quote.author);
-    const bookAuthors = bookData.map((book) => book.author);
+    const bookAuthors = bookDataCharacters.map((book) => book.author);
     const authors = [...authorNames, ...quoteAuthors, ...bookAuthors];
     const uniqueAuthors = [...new Set(authors)];
     const authorsObjects = uniqueAuthors.map((author) => ({
       name: author,
     }));
+
+    // extract characters data
+    const mappedCharacters = bookDataCharacters.flatMap((book) =>
+      book.characters.map((character) => ({
+        name: character.name,
+        book: book.title,
+        author: book.author,
+      })),
+    );
+
+    const charactersData = [];
+
+    mappedCharacters.forEach((entry) => {
+      const existingEntry = charactersData.find(
+        (item) => item.name === entry.name,
+      );
+      if (existingEntry) {
+        if (!existingEntry.books.includes(entry.book)) {
+          existingEntry.books.push(entry.book);
+        }
+      } else {
+        charactersData.push({
+          name: entry.name,
+          books: [entry.book],
+          author: entry.author,
+        });
+      }
+    });
+
+    //extract unique characters
+    // const bookCharacterNames = bookDataCharacters
+    //   .map((book) => book.characters)
+    //   .flat(1)
+    //   .map((character) => character.name);
+    // const uniqueCharacters = [...new Set(bookCharacterNames)];
+
+    // const charactersObjects = uniqueCharacters.map((character) => ({
+    //   name: character,
+    // }));
+
+    // // Create characters
+
+    // const characterPromises = charactersObjects.map((character) => {
+    //   this.character.upsert({
+    //     where: { name: character.name },
+    //     update: {},
+    //     create: { name: character.name },
+    //   });
+    // });
 
     // Create authors
     const authorPromises = authorsObjects.map((author) =>
@@ -125,7 +178,7 @@ export class DatabaseService extends PrismaClient<
 
     await Promise.all(updateAuthorPromises);
 
-    const bookPromises = bookData.map((book) => {
+    const bookPromises = bookDataCharacters.map((book) => {
       const randomPersonality = {
         extroversionIntroversion: getRandomNumber(),
         sensingIntuition: getRandomNumber(),
@@ -147,6 +200,7 @@ export class DatabaseService extends PrismaClient<
           popularity: book.popularity,
           description: book.description,
           genres: { set: book.genres }, // Assuming genres is an array of strings
+          pages: book.pages,
           author: { connect: { id: authorMap[book.author] } },
           date: new Date(book.date),
           image: book.image,
@@ -197,6 +251,51 @@ export class DatabaseService extends PrismaClient<
       });
     });
     await Promise.all(quotePromises);
+
+    // Create characters with authorId
+    const characterPromises = charactersData.map((character) => {
+      const randomPersonality = {
+        extroversionIntroversion: getRandomNumber(),
+        sensingIntuition: getRandomNumber(),
+        thinkingFeeling: getRandomNumber(),
+        judgingPerceiving: getRandomNumber(),
+        assertiveTurbulent: getRandomNumber(),
+      };
+
+      return this.character.upsert({
+        where: {
+          name_authorId: {
+            name: character.name,
+            authorId: authorMap[character.author],
+          },
+        },
+        update: {},
+        create: {
+          name: character.name,
+          books: {
+            connect: character.books.map((book) => ({
+              id: bookMap[book],
+            })),
+          },
+          author: {
+            connect: { id: authorMap[character.author] },
+          },
+          rating: 10,
+          popularity: 1,
+          description: 'Cool character',
+          bornPlace: 'Warsaw',
+          bornDate: '06.06.2024',
+          deathDate: '06.06.2224',
+          image: 'fake/link.com',
+          personality: {
+            create: randomPersonality,
+          },
+        },
+      });
+    });
+    await Promise.all(characterPromises);
+
+    // _____________________
 
     // const users = [
     //   { email: 'admin@admin.com', password: 'admin' },

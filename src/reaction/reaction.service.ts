@@ -111,6 +111,7 @@ export class ReactionService {
         quoteId,
         bookId,
         authorId,
+        characterId,
         type,
         entity,
         favorite,
@@ -163,7 +164,7 @@ export class ReactionService {
         });
 
         // Fetch details of the quote for which the reaction is being created
-        const quote = await this.databaseService.quote.findUnique({
+        const upsertedQuote = await this.databaseService.quote.findUnique({
           where: {
             id: quoteId,
           },
@@ -172,11 +173,13 @@ export class ReactionService {
           },
         });
 
-        if (!quote) {
+        if (!upsertedQuote) {
           throw new Error(`Quote with ID ${quoteId} not found.`);
         }
 
-        itemPersonality = quote.personality;
+        itemPersonality = upsertedQuote.personality;
+
+        //BOOK
       } else if (entity === ReactionEntity.BOOK) {
         existingReaction = await this.databaseService.reaction.findUnique({
           where: {
@@ -197,7 +200,7 @@ export class ReactionService {
           create: { userId, bookId, type, entity, favorite, list },
         });
 
-        const book = await this.databaseService.book.findUnique({
+        const upsertedBook = await this.databaseService.book.findUnique({
           where: {
             id: bookId,
           },
@@ -206,10 +209,11 @@ export class ReactionService {
           },
         });
 
-        if (!book) {
+        if (!upsertedBook) {
           throw new Error(`Book with ID ${bookId} not found.`);
         }
-        itemPersonality = book.personality;
+        itemPersonality = upsertedBook.personality;
+        //AUTHOR
       } else if (entity === ReactionEntity.AUTHOR) {
         existingReaction = await this.databaseService.reaction.findUnique({
           where: {
@@ -229,7 +233,7 @@ export class ReactionService {
           update: updateFields,
           create: { userId, authorId, type, entity, favorite, list },
         });
-        const author = await this.databaseService.author.findUnique({
+        const upsertedAuthor = await this.databaseService.author.findUnique({
           where: {
             id: authorId,
           },
@@ -238,10 +242,44 @@ export class ReactionService {
           },
         });
 
-        if (!author) {
+        if (!upsertedAuthor) {
           throw new Error(`Author with ID ${authorId} not found.`);
         }
-        itemPersonality = author.personality;
+        itemPersonality = upsertedAuthor.personality;
+        // CHARACTER
+      } else if (entity === ReactionEntity.CHARACTER) {
+        existingReaction = await this.databaseService.reaction.findUnique({
+          where: {
+            userId_characterId: {
+              userId,
+              characterId,
+            },
+          },
+        });
+        reaction = await this.databaseService.reaction.upsert({
+          where: {
+            userId_characterId: {
+              userId,
+              characterId,
+            },
+          },
+          update: updateFields,
+          create: { userId, characterId, type, entity, favorite, list },
+        });
+        const upsertedCharacter =
+          await this.databaseService.character.findUnique({
+            where: {
+              id: characterId,
+            },
+            include: {
+              personality: true,
+            },
+          });
+
+        if (!upsertedCharacter) {
+          throw new Error(`Character with ID ${characterId} not found.`);
+        }
+        itemPersonality = upsertedCharacter.personality;
       }
 
       if (existingReaction) {
@@ -251,84 +289,6 @@ export class ReactionService {
           itemPersonality,
           existingReaction,
         );
-        // switch (existingReaction.type) {
-        //   case ReactionType.LOVE:
-        //     updatedPersonality.extroversionIntroversion -=
-        //       itemPersonality.extroversionIntroversion * 0.2;
-        //     updatedPersonality.sensingIntuition -=
-        //       itemPersonality.sensingIntuition * 0.2;
-        //     updatedPersonality.thinkingFeeling -=
-        //       itemPersonality.thinkingFeeling * 0.2;
-        //     updatedPersonality.judgingPerceiving -=
-        //       itemPersonality.judgingPerceiving * 0.2;
-        //     updatedPersonality.assertiveTurbulent -=
-        //       itemPersonality.assertiveTurbulent * 0.2;
-        //     break;
-        //   case ReactionType.LIKE:
-        //     updatedPersonality.extroversionIntroversion -=
-        //       itemPersonality.extroversionIntroversion * 0.1;
-        //     updatedPersonality.sensingIntuition -=
-        //       itemPersonality.sensingIntuition * 0.1;
-        //     updatedPersonality.thinkingFeeling -=
-        //       itemPersonality.thinkingFeeling * 0.1;
-        //     updatedPersonality.judgingPerceiving -=
-        //       itemPersonality.judgingPerceiving * 0.1;
-        //     updatedPersonality.assertiveTurbulent -=
-        //       itemPersonality.assertiveTurbulent * 0.1;
-        //     break;
-        //   case ReactionType.DISLIKE:
-        //     updatedPersonality.extroversionIntroversion +=
-        //       itemPersonality.extroversionIntroversion * 0.1;
-        //     updatedPersonality.sensingIntuition +=
-        //       itemPersonality.sensingIntuition * 0.1;
-        //     updatedPersonality.thinkingFeeling +=
-        //       itemPersonality.thinkingFeeling * 0.1;
-        //     updatedPersonality.judgingPerceiving +=
-        //       itemPersonality.judgingPerceiving * 0.1;
-        //     updatedPersonality.assertiveTurbulent +=
-        //       itemPersonality.assertiveTurbulent * 0.1;
-        //     break;
-        //   case ReactionType.HATE:
-        //     updatedPersonality.extroversionIntroversion +=
-        //       itemPersonality.extroversionIntroversion * 0.2;
-        //     updatedPersonality.sensingIntuition +=
-        //       itemPersonality.sensingIntuition * 0.2;
-        //     updatedPersonality.thinkingFeeling +=
-        //       itemPersonality.thinkingFeeling * 0.2;
-        //     updatedPersonality.judgingPerceiving +=
-        //       itemPersonality.judgingPerceiving * 0.2;
-        //     updatedPersonality.assertiveTurbulent +=
-        //       itemPersonality.assertiveTurbulent * 0.2;
-        //     break;
-        //   default:
-        //     break;
-        // }
-
-        // if (existingReaction.favorite === true) {
-        //   updatedPersonality.extroversionIntroversion -=
-        //     itemPersonality.extroversionIntroversion * 0.5;
-        //   updatedPersonality.sensingIntuition -=
-        //     itemPersonality.sensingIntuition * 0.5;
-        //   updatedPersonality.thinkingFeeling -=
-        //     itemPersonality.thinkingFeeling * 0.5;
-        //   updatedPersonality.judgingPerceiving -=
-        //     itemPersonality.judgingPerceiving * 0.5;
-        //   updatedPersonality.assertiveTurbulent -=
-        //     itemPersonality.assertiveTurbulent * 0.5;
-        // }
-
-        // if (existingReaction.list === true) {
-        //   updatedPersonality.extroversionIntroversion -=
-        //     itemPersonality.extroversionIntroversion * 0.3;
-        //   updatedPersonality.sensingIntuition -=
-        //     itemPersonality.sensingIntuition * 0.3;
-        //   updatedPersonality.thinkingFeeling -=
-        //     itemPersonality.thinkingFeeling * 0.3;
-        //   updatedPersonality.judgingPerceiving -=
-        //     itemPersonality.judgingPerceiving * 0.3;
-        //   updatedPersonality.assertiveTurbulent -=
-        //     itemPersonality.assertiveTurbulent * 0.3;
-        // }
       }
 
       switch (type) {
@@ -478,6 +438,7 @@ export class ReactionService {
         }
 
         itemPersonality = quote.personality;
+        //BOOK
       } else if (entity === ReactionEntity.BOOK) {
         const book = await this.databaseService.book.findUnique({
           where: {
@@ -492,6 +453,7 @@ export class ReactionService {
           throw new Error(`Book with ID ${reaction.bookId} not found.`);
         }
         itemPersonality = book.personality;
+        //AUTHOR
       } else if (entity === ReactionEntity.AUTHOR) {
         const author = await this.databaseService.author.findUnique({
           where: {
@@ -506,6 +468,22 @@ export class ReactionService {
           throw new Error(`Author with ID ${reaction.authorId} not found.`);
         }
         itemPersonality = author.personality;
+      } else if (entity === ReactionEntity.CHARACTER) {
+        const character = await this.databaseService.character.findUnique({
+          where: {
+            id: reaction.characterId,
+          },
+          include: {
+            personality: true,
+          },
+        });
+
+        if (!character) {
+          throw new Error(
+            `Character with ID ${reaction.characterId} not found.`,
+          );
+        }
+        itemPersonality = character.personality;
       }
 
       removePersonalityCalc(updatedPersonality, itemPersonality, reaction);
@@ -576,6 +554,7 @@ export class ReactionService {
         book: entity === ReactionEntity.BOOK || !entity,
         author: entity === ReactionEntity.AUTHOR || !entity,
         quote: entity === ReactionEntity.QUOTE || !entity,
+        character: entity === ReactionEntity.CHARACTER || !entity,
       };
 
       // Fetch reactions based on the constructed where and include clauses
