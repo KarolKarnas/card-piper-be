@@ -35,9 +35,9 @@ export class UsersService {
   //   return user;
   // }
 
-  async create(createUserDto: Prisma.UserCreateInput) {
-    return this.databaseService.user.create({ data: createUserDto });
-  }
+  // async create(createUserDto: Prisma.UserCreateInput) {
+  //   return this.databaseService.user.create({ data: createUserDto });
+  // }
 
   async update(id: number, updatedUserDto: Prisma.UserCreateInput) {
     return this.databaseService.user.update({

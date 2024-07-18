@@ -9,12 +9,13 @@ import {
   Query,
   ParseIntPipe,
   DefaultValuePipe,
-  // UseGuards,
+  UseGuards,
 } from '@nestjs/common';
 import { QuotesService } from './quotes.service';
 import { Prisma } from '@prisma/client';
 // import { JwtGuard } from '../auth/guard';
-// import { AdminGuard } from '../auth/guard';
+import { AdminGuard } from '../auth/guard';
+import { PersonalityData } from '../utils/types';
 
 // @UseGuards(JwtGuard)
 @Controller('quotes')
@@ -30,8 +31,9 @@ export class QuotesController {
   findAll(
     @Query('skip', new DefaultValuePipe(0), ParseIntPipe) skip?: number,
     @Query('take', new DefaultValuePipe(0), ParseIntPipe) take?: number,
+    @Body() userPersonality?: PersonalityData,
   ) {
-    return this.quotesService.findAll(skip, take);
+    return this.quotesService.findAll(skip, take, userPersonality);
   }
 
   @Get(':id')
@@ -47,7 +49,7 @@ export class QuotesController {
     return this.quotesService.update(+id, updateQuoteDto);
   }
 
-  // @UseGuards(AdminGuard)
+  @UseGuards(AdminGuard)
   @Delete(':id')
   remove(@Param('id') id: string) {
     return this.quotesService.remove(+id);

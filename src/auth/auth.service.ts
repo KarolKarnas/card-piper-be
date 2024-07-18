@@ -45,9 +45,27 @@ export class AuthService {
                   create: zeroPersonality,
                 },
               },
+        include: {
+          personality: {
+            select: {
+              assertiveTurbulent: true,
+              extroversionIntroversion: true,
+              judgingPerceiving: true,
+              sensingIntuition: true,
+              thinkingFeeling: true,
+            },
+          },
+        },
       });
 
-      return this.signToken(user.id, user.email);
+      const { access_token } = await this.signToken(user.id, user.email);
+
+      return {
+        access_token,
+        email: user.email,
+        role: user.role,
+        personality: user.personality,
+      };
     } catch (error) {
       if (error instanceof PrismaClientKnownRequestError) {
         if (error.code === 'P2002') {
@@ -61,6 +79,17 @@ export class AuthService {
   async signin(signupDto: SignupDto) {
     const user = await this.databaseService.user.findUnique({
       where: { email: signupDto.email },
+      include: {
+        personality: {
+          select: {
+            assertiveTurbulent: true,
+            extroversionIntroversion: true,
+            judgingPerceiving: true,
+            sensingIntuition: true,
+            thinkingFeeling: true,
+          },
+        },
+      },
     });
 
     if (!user) {
@@ -73,7 +102,14 @@ export class AuthService {
       throw new ForbiddenException('Incorrect credentials');
     }
 
-    return this.signToken(user.id, user.email);
+    const { access_token } = await this.signToken(user.id, user.email);
+
+    return {
+      access_token,
+      email: user.email,
+      role: user.role,
+      personality: user.personality,
+    };
   }
 
   async signToken(

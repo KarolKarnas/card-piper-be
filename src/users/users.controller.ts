@@ -1,11 +1,11 @@
 import {
-  Body,
+  // Body,
   Controller,
   Delete,
   Get,
   Param,
   // Patch,
-  Post,
+  // Post,
   Query,
   UseGuards,
   ParseIntPipe,
@@ -16,7 +16,11 @@ import {
   // ForbiddenException,
   // ValidationPipe,
 } from '@nestjs/common';
-import { Prisma, User, UserRole } from '@prisma/client';
+import {
+  // Prisma,
+  User,
+  UserRole,
+} from '@prisma/client';
 import { UsersService } from './users.service';
 import { JwtGuard } from '../auth/guard';
 import { GetUser } from '../auth/decorator';
@@ -44,10 +48,10 @@ export class UsersController {
   // }
 
   //remove???
-  @Post() // POST /users
-  create(@Body() createUserDto: Prisma.UserCreateInput) {
-    return this.usersService.create(createUserDto);
-  }
+  // @Post() // POST /users
+  // create(@Body() createUserDto: Prisma.UserCreateInput) {
+  //   return this.usersService.create(createUserDto);
+  // }
 
   // @Patch(':id') // PATCH /users/:id
   // update(
