@@ -31,7 +31,7 @@ export class QuotesController {
   findAll(
     @Query('skip', new DefaultValuePipe(0), ParseIntPipe) skip?: number,
     @Query('take', new DefaultValuePipe(0), ParseIntPipe) take?: number,
-    @Body() userPersonality?: PersonalityData,
+    @Query() userPersonality?: PersonalityData,
   ) {
     return this.quotesService.findAll(skip, take, userPersonality);
   }
