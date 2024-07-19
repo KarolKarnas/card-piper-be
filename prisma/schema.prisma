@@ -30,19 +30,25 @@ model FavoriteQuote {
 }
 
 model Personality {
-  id                       Int         @id @default(autoincrement())
-  createdAt                DateTime    @default(now())
-  updatedAt                DateTime    @updatedAt
+  id                       Int            @id @default(autoincrement())
+  createdAt                DateTime       @default(now())
+  updatedAt                DateTime       @updatedAt
   extroversionIntroversion Float
   sensingIntuition         Float
   thinkingFeeling          Float
   judgingPerceiving        Float
   assertiveTurbulent       Float
-  quotes                   Quote[]
-  books                    Book[]
-  authors                  Author[]
-  users                    User[]
-  characters               Character[]
+  entity                   ReactionEntity
+  quote                    Quote?          @relation(fields: [quoteId], references: [id])
+  book                     Book?           @relation(fields: [bookId], references: [id])
+  author                   Author?         @relation(fields: [authorId], references: [id])
+  user                     User?           @relation(fields: [userId], references: [id])
+  character                Character?      @relation(fields: [characterId], references: [id])
+  quoteId                  Int?            @unique
+  bookId                   Int?            @unique
+  authorId                 Int?            @unique
+  userId                   Int?            @unique
+  characterId              Int?            @unique
 }
 
 model Quote {
@@ -59,8 +65,7 @@ model Quote {
   authorId       Int
   bookId         Int?
   reactions      Reaction[]      @relation("QuoteReactions")
-  personality    Personality?    @relation(fields: [personalityId], references: [id])
-  personalityId  Int?
+  personality    Personality?
 
   @@unique([text, authorId])
 }
@@ -79,30 +84,28 @@ model User {
   favoritedBy FavoriteQuote[]
   reactions   Reaction[]
 
-  personality   Personality @relation(fields: [personalityId], references: [id])
-  personalityId Int
+  personality Personality?
 }
 
 model Author {
-  id            Int          @id @default(autoincrement())
-  name          String       @unique
-  createdAt     DateTime     @default(now())
-  updatedAt     DateTime     @updatedAt
-  quotes        Quote[]
-  books         Book[]
-  bornPlace     String?
-  bornDate      String?
-  deathDate     String?
-  website       String?
-  genres        String[]
-  bio           String?
-  rating        Float?
-  popularity    Int?
-  image         String?
-  reactions     Reaction[]   @relation("AuthorReactions")
-  personality   Personality? @relation(fields: [personalityId], references: [id])
-  personalityId Int?
-  characters    Character[]
+  id          Int          @id @default(autoincrement())
+  name        String       @unique
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+  quotes      Quote[]
+  books       Book[]
+  bornPlace   String?
+  bornDate    String?
+  deathDate   String?
+  website     String?
+  genres      String[]
+  bio         String?
+  rating      Float?
+  popularity  Int?
+  image       String?
+  reactions   Reaction[]   @relation("AuthorReactions")
+  personality Personality?
+  characters  Character[]
 }
 
 model Book {
@@ -119,8 +122,7 @@ model Book {
   pages         Int
   date          DateTime
   image         String
-  personality   Personality? @relation(fields: [personalityId], references: [id])
-  personalityId Int?
+  personality   Personality?
   quotes        Quote[]
   reactions     Reaction[]   @relation("BookReactions")
   characters    Character[]  @relation("CharacterBooks")
@@ -129,21 +131,20 @@ model Book {
 }
 
 model Character {
-  id            Int          @id @default(autoincrement())
-  name          String
-  books         Book[]       @relation("CharacterBooks")
-  author        Author       @relation(fields: [authorId], references: [id])
-  authorId      Int
-  rating        Float
-  popularity    Int
-  description   String
-  bornPlace     String?
-  bornDate      String?
-  deathDate     String?
-  image         String
-  personality   Personality? @relation(fields: [personalityId], references: [id])
-  personalityId Int?
-  reactions     Reaction[]   @relation("CharacterReactions")
+  id          Int          @id @default(autoincrement())
+  name        String
+  books       Book[]       @relation("CharacterBooks")
+  author      Author       @relation(fields: [authorId], references: [id])
+  authorId    Int
+  rating      Float
+  popularity  Int
+  description String
+  bornPlace   String?
+  bornDate    String?
+  deathDate   String?
+  image       String
+  personality Personality?
+  reactions   Reaction[]   @relation("CharacterReactions")
 
   @@unique([name, authorId])
 }
@@ -165,6 +166,7 @@ enum ReactionEntity {
   BOOK
   QUOTE
   CHARACTER
+  USER
 }
 
 model Reaction {

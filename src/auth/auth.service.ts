@@ -5,6 +5,7 @@ import * as argon2 from 'argon2';
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
+import { ReactionEntity, UserRole } from '@prisma/client';
 
 @Injectable()
 export class AuthService {
@@ -25,6 +26,7 @@ export class AuthService {
         thinkingFeeling: 0,
         judgingPerceiving: 0,
         assertiveTurbulent: 0,
+        entity: ReactionEntity.USER,
       };
       const user = await this.databaseService.user.create({
         data:
@@ -32,7 +34,7 @@ export class AuthService {
             ? {
                 email: signupDto.email,
                 hash,
-                role: 'ADMIN',
+                role: UserRole.ADMIN,
                 personality: {
                   create: zeroPersonality,
                 },
@@ -40,7 +42,7 @@ export class AuthService {
             : {
                 email: signupDto.email,
                 hash,
-                role: 'USER',
+                role: UserRole.USER,
                 personality: {
                   create: zeroPersonality,
                 },

@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { Prisma, PrismaClient } from '@prisma/client';
+import { Prisma, PrismaClient, ReactionEntity } from '@prisma/client';
 import { ConfigService } from '@nestjs/config';
 import {
   quotesData,
@@ -156,6 +156,7 @@ export class DatabaseService extends PrismaClient<
         thinkingFeeling: getRandomNumber(),
         judgingPerceiving: getRandomNumber(),
         assertiveTurbulent: getRandomNumber(),
+        entity: ReactionEntity.AUTHOR,
       };
       return this.author.update({
         where: { name: author.name },
@@ -185,6 +186,7 @@ export class DatabaseService extends PrismaClient<
         thinkingFeeling: getRandomNumber(),
         judgingPerceiving: getRandomNumber(),
         assertiveTurbulent: getRandomNumber(),
+        entity: ReactionEntity.BOOK,
       };
       return this.book.upsert({
         where: {
@@ -224,6 +226,7 @@ export class DatabaseService extends PrismaClient<
         thinkingFeeling: getRandomNumber(),
         judgingPerceiving: getRandomNumber(),
         assertiveTurbulent: getRandomNumber(),
+        entity: ReactionEntity.QUOTE,
       };
 
       return this.quote.upsert({
@@ -260,6 +263,7 @@ export class DatabaseService extends PrismaClient<
         thinkingFeeling: getRandomNumber(),
         judgingPerceiving: getRandomNumber(),
         assertiveTurbulent: getRandomNumber(),
+        entity: ReactionEntity.CHARACTER,
       };
 
       return this.character.upsert({

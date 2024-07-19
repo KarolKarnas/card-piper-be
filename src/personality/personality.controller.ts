@@ -1,31 +1,20 @@
 import {
   Controller,
-  Get,
-  Post,
-  Body,
-  Patch,
-  Param,
-  Delete,
-  Query,
-  ParseIntPipe,
   DefaultValuePipe,
+  Get,
+  ParseIntPipe,
+  Query,
   UseGuards,
 } from '@nestjs/common';
-import { QuotesService } from './quotes.service';
-import { Prisma } from '@prisma/client';
+import { PersonalityService } from './personality.service';
 import { JwtGuard } from '../auth/guard';
-import { AdminGuard } from '../auth/guard';
+import { ReactionEntity } from '@prisma/client';
 
-@UseGuards(JwtGuard)
-@Controller('quotes')
-export class QuotesController {
-  constructor(private readonly quotesService: QuotesService) {}
+@Controller('personality')
+export class PersonalityController {
+  constructor(private readonly personalityService: PersonalityService) {}
 
-  @Post()
-  create(@Body() createQuoteDto: Prisma.QuoteCreateInput) {
-    return this.quotesService.create(createQuoteDto);
-  }
-
+  @UseGuards(JwtGuard)
   @Get()
   findAll(
     @Query('skip', new DefaultValuePipe(0), ParseIntPipe) skip?: number,
@@ -40,8 +29,9 @@ export class QuotesController {
     sensingIntuition?: number,
     @Query('thinkingFeeling', new DefaultValuePipe(0), ParseIntPipe)
     thinkingFeeling?: number,
+    @Query('entity') entity?: ReactionEntity,
   ) {
-    return this.quotesService.findAll(
+    return this.personalityService.findAll(
       skip,
       take,
       assertiveTurbulent,
@@ -49,25 +39,7 @@ export class QuotesController {
       judgingPerceiving,
       sensingIntuition,
       thinkingFeeling,
+      entity,
     );
-  }
-
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.quotesService.findOne(+id);
-  }
-
-  @Patch(':id')
-  update(
-    @Param('id') id: string,
-    @Body() updateQuoteDto: Prisma.QuoteCreateInput,
-  ) {
-    return this.quotesService.update(+id, updateQuoteDto);
-  }
-
-  @UseGuards(AdminGuard)
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.quotesService.remove(+id);
   }
 }
