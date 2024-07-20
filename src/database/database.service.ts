@@ -1,11 +1,18 @@
 import { Injectable } from '@nestjs/common';
-import { Prisma, PrismaClient, ReactionEntity } from '@prisma/client';
+import {
+  Prisma,
+  PrismaClient,
+  ReactionEntity,
+  ReactionType,
+  UserRole,
+} from '@prisma/client';
 import { ConfigService } from '@nestjs/config';
 import {
   quotesData,
   bookDataCharacters,
   authorData,
 } from './database_secret/data';
+import * as argon2 from 'argon2';
 
 @Injectable()
 export class DatabaseService extends PrismaClient<
@@ -110,27 +117,6 @@ export class DatabaseService extends PrismaClient<
         });
       }
     });
-
-    //extract unique characters
-    // const bookCharacterNames = bookDataCharacters
-    //   .map((book) => book.characters)
-    //   .flat(1)
-    //   .map((character) => character.name);
-    // const uniqueCharacters = [...new Set(bookCharacterNames)];
-
-    // const charactersObjects = uniqueCharacters.map((character) => ({
-    //   name: character,
-    // }));
-
-    // // Create characters
-
-    // const characterPromises = charactersObjects.map((character) => {
-    //   this.character.upsert({
-    //     where: { name: character.name },
-    //     update: {},
-    //     create: { name: character.name },
-    //   });
-    // });
 
     // Create authors
     const authorPromises = authorsObjects.map((author) =>
@@ -299,26 +285,117 @@ export class DatabaseService extends PrismaClient<
     });
     await Promise.all(characterPromises);
 
-    // _____________________
+    // USERS
+    const users = [
+      { email: 'admin@admin.com', password: 'admin' },
+      { email: 'user@user.com', password: 'user' },
+      { email: 'test@test.com', password: 'test' },
+    ];
 
-    // const users = [
-    //   { email: 'admin@admin.com', password: 'admin' },
-    //   { email: 'user@user.com', password: 'user' },
-    //   { email: 'test@test.com', password: 'test' },
-    // ];
+    const userPromises = users.map(async (user) => {
+      const hash = await argon2.hash(user.password);
+      const zeroPersonality = {
+        extroversionIntroversion: 0,
+        sensingIntuition: 0,
+        thinkingFeeling: 0,
+        judgingPerceiving: 0,
+        assertiveTurbulent: 0,
+        entity: ReactionEntity.USER,
+      };
+      return this.user.upsert({
+        where: {
+          email: user.email,
+        },
+        update: {},
+        create: {
+          email: user.email,
+          hash,
+          role:
+            user.email === 'admin@admin.com' ? UserRole.ADMIN : UserRole.USER,
+          personality: {
+            create: zeroPersonality,
+          },
+        },
+      });
+    });
 
-    // const userPromises = users.map((user) =>
-    //   this.user.upsert({
-    //     where: {
-    //       email: user.email,
-    //     },
-    //     update: {},
-    //     create: {
-    //       email: user.email,
-    //       password: user.password,
-    //     },
-    //   }),
-    // );
+    await Promise.all(userPromises);
+
+    // REACTIONS
+
+    const reactions = [
+      {
+        userId: 1,
+        characterId: 1,
+        type: ReactionType.LOVE,
+        entity: ReactionEntity.CHARACTER,
+        favorite: true,
+        list: true,
+      },
+      {
+        userId: 1,
+        bookId: 1,
+        type: ReactionType.HATE,
+        entity: ReactionEntity.BOOK,
+        favorite: true,
+        list: true,
+      },
+      {
+        userId: 1,
+        authorId: 1,
+        type: ReactionType.LIKE,
+        entity: ReactionEntity.AUTHOR,
+        favorite: true,
+        list: true,
+      },
+      {
+        userId: 1,
+        quoteId: 1,
+        type: ReactionType.DISLIKE,
+        entity: ReactionEntity.QUOTE,
+        favorite: true,
+        list: true,
+      },
+      {
+        userId: 1,
+        quoteId: 1,
+        type: ReactionType.DISLIKE,
+        entity: ReactionEntity.QUOTE,
+        favorite: true,
+        list: true,
+      },
+    ];
+
+    function buildWhereClause(reaction) {
+      const { userId, characterId, bookId, authorId, quoteId } = reaction;
+      if (characterId) return { userId_characterId: { userId, characterId } };
+      if (bookId) return { userId_bookId: { userId, bookId } };
+      if (authorId) return { userId_authorId: { userId, authorId } };
+      if (quoteId) return { userId_quoteId: { userId, quoteId } };
+      throw new Error('Invalid reaction: no valid entityId found.');
+    }
+
+    const reactionPromises = reactions.map(async (reaction) => {
+      const whereClause = buildWhereClause(reaction);
+
+      return this.reaction.upsert({
+        where: whereClause as Prisma.ReactionWhereUniqueInput,
+        update: {}, // No updates needed
+        create: {
+          userId: reaction.userId,
+          characterId: reaction.characterId,
+          bookId: reaction.bookId,
+          authorId: reaction.authorId,
+          quoteId: reaction.quoteId,
+          type: reaction.type,
+          entity: reaction.entity,
+          favorite: reaction.favorite,
+          list: reaction.list,
+        },
+      });
+    });
+
+    await Promise.all(reactionPromises);
 
     return { message: 'DATABASE POPULATED SIR!' };
   }

@@ -17,7 +17,7 @@ export class AuthService {
 
   async signup(signupDto: SignupDto) {
     const hash = await argon2.hash(signupDto.password);
-    const adminSecret = Boolean(this.config.get('ADMIN_SECRET'));
+    // const adminSecret = Boolean(this.config.get('ADMIN_SECRET'));
 
     try {
       const zeroPersonality = {
@@ -29,24 +29,15 @@ export class AuthService {
         entity: ReactionEntity.USER,
       };
       const user = await this.databaseService.user.create({
-        data:
-          adminSecret && signupDto.email === 'admin@admin.com'
-            ? {
-                email: signupDto.email,
-                hash,
-                role: UserRole.ADMIN,
-                personality: {
-                  create: zeroPersonality,
-                },
-              }
-            : {
-                email: signupDto.email,
-                hash,
-                role: UserRole.USER,
-                personality: {
-                  create: zeroPersonality,
-                },
-              },
+        data: {
+          email: signupDto.email,
+          hash,
+          role: UserRole.USER,
+          personality: {
+            create: zeroPersonality,
+          },
+        },
+
         include: {
           personality: {
             select: {

@@ -9,6 +9,7 @@ import {
 import { PersonalityService } from './personality.service';
 import { JwtGuard } from '../auth/guard';
 import { ReactionEntity } from '@prisma/client';
+import { ParseEntitiesPipe } from '../utils/entities.pipe';
 
 @Controller('personality')
 export class PersonalityController {
@@ -30,6 +31,7 @@ export class PersonalityController {
     @Query('thinkingFeeling', new DefaultValuePipe(0), ParseIntPipe)
     thinkingFeeling?: number,
     @Query('entity') entity?: ReactionEntity,
+    @Query('entities', new ParseEntitiesPipe()) entities?: ReactionEntity[],
   ) {
     return this.personalityService.findAll(
       skip,
@@ -40,6 +42,7 @@ export class PersonalityController {
       sensingIntuition,
       thinkingFeeling,
       entity,
+      entities,
     );
   }
 }
