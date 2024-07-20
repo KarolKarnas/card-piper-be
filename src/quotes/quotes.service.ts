@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import { DatabaseService } from '../database/database.service';
-import { PersonalityData } from '../utils/types';
+import { calculateEuclideanDistance } from '../utils';
 
 @Injectable()
 export class QuotesService {
@@ -13,21 +13,25 @@ export class QuotesService {
     });
   }
 
-  async findAll(skip: number, take: number, userPersonality: PersonalityData) {
-    function calculateEuclideanDistance(
-      p1: PersonalityData,
-      p2: PersonalityData,
-    ) {
-      return Math.sqrt(
-        Math.pow(p1.extroversionIntroversion - p2.extroversionIntroversion, 2) +
-          Math.pow(p1.sensingIntuition - p2.sensingIntuition, 2) +
-          Math.pow(p1.thinkingFeeling - p2.thinkingFeeling, 2) +
-          Math.pow(p1.judgingPerceiving - p2.judgingPerceiving, 2) +
-          Math.pow(p1.assertiveTurbulent - p2.assertiveTurbulent, 2),
-      );
-    }
+  async findAll(
+    skip: number,
+    take: number,
+    assertiveTurbulent: number,
+    extroversionIntroversion: number,
+    judgingPerceiving: number,
+    sensingIntuition: number,
+    thinkingFeeling: number,
+  ) {
+    // console.log(userPersonality);
+    // if (skip === 0 && take === 0) return this.databaseService.quote.findMany();
 
-    if (skip === 0 && take === 0) return this.databaseService.quote.findMany();
+    const userPersonality = {
+      assertiveTurbulent,
+      extroversionIntroversion,
+      judgingPerceiving,
+      sensingIntuition,
+      thinkingFeeling,
+    };
 
     if (userPersonality !== null) {
       const quotes = await this.databaseService.quote.findMany({
@@ -57,7 +61,7 @@ export class QuotesService {
       return sortedQuotesWithDistances.slice(skip, skip + take);
     }
 
-    return this.databaseService.quote.findMany({ skip: skip, take: take });
+    // return this.databaseService.quote.findMany({ skip: skip, take: take });
   }
 
   async findOne(id: number) {

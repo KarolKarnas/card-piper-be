@@ -14,6 +14,7 @@ import { AuthorsModule } from './authors/authors.module';
 import { BooksModule } from './books/books.module';
 import { ReactionModule } from './reaction/reaction.module';
 import { CharacterModule } from './character/character.module';
+import { PersonalityModule } from './personality/personality.module';
 
 @Module({
   imports: [
@@ -34,6 +35,7 @@ import { CharacterModule } from './character/character.module';
     BooksModule,
     ReactionModule,
     CharacterModule,
+    PersonalityModule,
   ],
   controllers: [AppController],
   providers: [
