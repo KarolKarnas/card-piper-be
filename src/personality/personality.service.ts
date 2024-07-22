@@ -73,6 +73,11 @@ export class PersonalityService {
             ? {
                 include: {
                   personality: true,
+                  reactedBy: {
+                    include: {
+                      user: true,
+                    },
+                  },
                 },
               }
             : false,

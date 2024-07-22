@@ -39,16 +39,16 @@ model Personality {
   judgingPerceiving        Float
   assertiveTurbulent       Float
   entity                   ReactionEntity
-  quote                    Quote?          @relation(fields: [quoteId], references: [id])
-  book                     Book?           @relation(fields: [bookId], references: [id])
-  author                   Author?         @relation(fields: [authorId], references: [id])
-  user                     User?           @relation(fields: [userId], references: [id])
-  character                Character?      @relation(fields: [characterId], references: [id])
-  quoteId                  Int?            @unique
-  bookId                   Int?            @unique
-  authorId                 Int?            @unique
-  userId                   Int?            @unique
-  characterId              Int?            @unique
+  quote                    Quote?         @relation(fields: [quoteId], references: [id])
+  book                     Book?          @relation(fields: [bookId], references: [id])
+  author                   Author?        @relation(fields: [authorId], references: [id])
+  user                     User?          @relation(fields: [userId], references: [id])
+  character                Character?     @relation(fields: [characterId], references: [id])
+  quoteId                  Int?           @unique
+  bookId                   Int?           @unique
+  authorId                 Int?           @unique
+  userId                   Int?           @unique
+  characterId              Int?           @unique
 }
 
 model Quote {
@@ -82,7 +82,8 @@ model User {
   lastName  String?
 
   favoritedBy FavoriteQuote[]
-  reactions   Reaction[]
+  reactions   Reaction[]      @relation("ReactionsByUser")
+  reactedBy   Reaction[]      @relation("UserReactions")
 
   personality Personality?
 }
@@ -109,23 +110,23 @@ model Author {
 }
 
 model Book {
-  id            Int          @id @default(autoincrement())
-  title         String       @unique
-  createdAt     DateTime     @default(now())
-  updatedAt     DateTime     @updatedAt
-  author        Author       @relation(fields: [authorId], references: [id])
-  authorId      Int
-  rating        Float
-  popularity    Int
-  description   String
-  genres        String[]
-  pages         Int
-  date          DateTime
-  image         String
-  personality   Personality?
-  quotes        Quote[]
-  reactions     Reaction[]   @relation("BookReactions")
-  characters    Character[]  @relation("CharacterBooks")
+  id          Int          @id @default(autoincrement())
+  title       String       @unique
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+  author      Author       @relation(fields: [authorId], references: [id])
+  authorId    Int
+  rating      Float
+  popularity  Int
+  description String
+  genres      String[]
+  pages       Int
+  date        DateTime
+  image       String
+  personality Personality?
+  quotes      Quote[]
+  reactions   Reaction[]   @relation("BookReactions")
+  characters  Character[]  @relation("CharacterBooks")
 
   @@unique([title, authorId])
 }
@@ -175,7 +176,7 @@ model Reaction {
   updatedAt DateTime @updatedAt
 
   // Define the relationship to User
-  user   User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user   User @relation("ReactionsByUser", fields: [userId], references: [id], onDelete: Cascade)
   userId Int
 
   // Define polymorphic relationships
@@ -191,14 +192,19 @@ model Reaction {
   character   Character? @relation("CharacterReactions", fields: [characterId], references: [id], onDelete: Cascade)
   characterId Int?
 
+  reactedUser   User? @relation("UserReactions", fields: [reactedUserId], references: [id], onDelete: Cascade)
+  reactedUserId Int?
+
   // Define the reaction type
   favorite Boolean
   list     Boolean
   type     ReactionType
   entity   ReactionEntity
 
+
   @@unique([userId, quoteId])
   @@unique([userId, bookId])
   @@unique([userId, authorId])
   @@unique([userId, characterId])
+  @@unique([userId, reactedUserId])
 }

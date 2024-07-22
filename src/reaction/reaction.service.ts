@@ -112,6 +112,7 @@ export class ReactionService {
         bookId,
         authorId,
         characterId,
+        reactedUserId,
         type,
         entity,
         favorite,
@@ -280,6 +281,40 @@ export class ReactionService {
           throw new Error(`Character with ID ${characterId} not found.`);
         }
         itemPersonality = upsertedCharacter.personality;
+
+        //USER
+      } else if (entity === ReactionEntity.USER) {
+        existingReaction = await this.databaseService.reaction.findUnique({
+          where: {
+            userId_reactedUserId: {
+              userId,
+              reactedUserId,
+            },
+          },
+        });
+        reaction = await this.databaseService.reaction.upsert({
+          where: {
+            userId_reactedUserId: {
+              userId,
+              reactedUserId,
+            },
+          },
+          update: updateFields,
+          create: { userId, reactedUserId, type, entity, favorite, list },
+        });
+        const upsertedReactedUser = await this.databaseService.user.findUnique({
+          where: {
+            id: reactedUserId,
+          },
+          include: {
+            personality: true,
+          },
+        });
+
+        if (!upsertedReactedUser) {
+          throw new Error(`Reacted User with ID ${reactedUserId} not found.`);
+        }
+        itemPersonality = upsertedReactedUser.personality;
       }
 
       if (existingReaction) {
@@ -377,7 +412,14 @@ export class ReactionService {
         },
         data: {
           personality: {
-            update: updatedPersonality,
+            update: {
+              extroversionIntroversion:
+                updatedPersonality.extroversionIntroversion,
+              sensingIntuition: updatedPersonality.sensingIntuition,
+              thinkingFeeling: updatedPersonality.thinkingFeeling,
+              judgingPerceiving: updatedPersonality.judgingPerceiving,
+              assertiveTurbulent: updatedPersonality.assertiveTurbulent,
+            },
           },
         },
       });
@@ -388,8 +430,8 @@ export class ReactionService {
 
       return {
         reaction: reaction,
-        updatedPersonality: updatedPersonality,
-        userPersonality: user.personality,
+        // updatedPersonality: updatedPersonality,
+        // userPersonality: user.personality,
       };
     } catch (error) {
       if (error instanceof Prisma.PrismaClientKnownRequestError) {
@@ -484,6 +526,22 @@ export class ReactionService {
           );
         }
         itemPersonality = character.personality;
+      } else if (entity === ReactionEntity.USER) {
+        const reactedUser = await this.databaseService.user.findUnique({
+          where: {
+            id: reaction.reactedUserId,
+          },
+          include: {
+            personality: true,
+          },
+        });
+
+        if (!reactedUser) {
+          throw new Error(
+            `Reacted User with ID ${reaction.reactedUserId} not found.`,
+          );
+        }
+        itemPersonality = reactedUser.personality;
       }
 
       removePersonalityCalc(updatedPersonality, itemPersonality, reaction);
@@ -494,7 +552,14 @@ export class ReactionService {
         },
         data: {
           personality: {
-            update: updatedPersonality,
+            update: {
+              extroversionIntroversion:
+                updatedPersonality.extroversionIntroversion,
+              sensingIntuition: updatedPersonality.sensingIntuition,
+              thinkingFeeling: updatedPersonality.thinkingFeeling,
+              judgingPerceiving: updatedPersonality.judgingPerceiving,
+              assertiveTurbulent: updatedPersonality.assertiveTurbulent,
+            },
           },
         },
       });
@@ -519,12 +584,38 @@ export class ReactionService {
 
   async findAllReactions(
     userId: number,
+    all?: boolean,
     type?: ReactionType,
     entity?: ReactionEntity,
     favorite?: string,
     list?: string,
   ) {
     try {
+      // Build the include clause based on the provided entity
+      const includeClause: Prisma.ReactionInclude = {
+        book: entity === ReactionEntity.BOOK || !entity,
+        author: entity === ReactionEntity.AUTHOR || !entity,
+        quote: entity === ReactionEntity.QUOTE || !entity,
+        character: entity === ReactionEntity.CHARACTER || !entity,
+        reactedUser: {
+          select: {
+            id: true,
+            email: true,
+          },
+        },
+      };
+
+      // Fetch reactions based on the constructed include clauses and where clause only checking userId
+
+      if (all === true) {
+        return await this.databaseService.reaction.findMany({
+          where: {
+            userId: userId,
+          },
+          include: includeClause,
+        });
+      }
+
       // Build the where clause based on provided filters
       const whereClause: Prisma.ReactionWhereInput = { userId };
 
@@ -549,19 +640,12 @@ export class ReactionService {
         whereClause.list = true;
       }
 
-      // Build the include clause based on the provided entity
-      const includeClause: Prisma.ReactionInclude = {
-        book: entity === ReactionEntity.BOOK || !entity,
-        author: entity === ReactionEntity.AUTHOR || !entity,
-        quote: entity === ReactionEntity.QUOTE || !entity,
-        character: entity === ReactionEntity.CHARACTER || !entity,
-      };
-
       // Fetch reactions based on the constructed where and include clauses
       const reactions = await this.databaseService.reaction.findMany({
         where: whereClause,
         include: includeClause,
       });
+
       return reactions;
     } catch (error) {
       console.log('Error fetching reactions', error);

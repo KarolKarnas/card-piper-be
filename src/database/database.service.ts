@@ -358,21 +358,23 @@ export class DatabaseService extends PrismaClient<
       },
       {
         userId: 1,
-        quoteId: 1,
-        type: ReactionType.DISLIKE,
-        entity: ReactionEntity.QUOTE,
-        favorite: true,
-        list: true,
+        reactedUserId: 2,
+        type: ReactionType.HATE,
+        entity: ReactionEntity.USER,
+        favorite: false,
+        list: false,
       },
     ];
 
     function buildWhereClause(reaction) {
-      const { userId, characterId, bookId, authorId, quoteId } = reaction;
+      const { userId, characterId, bookId, authorId, quoteId, reactedUserId } =
+        reaction;
       if (characterId) return { userId_characterId: { userId, characterId } };
       if (bookId) return { userId_bookId: { userId, bookId } };
       if (authorId) return { userId_authorId: { userId, authorId } };
       if (quoteId) return { userId_quoteId: { userId, quoteId } };
-      throw new Error('Invalid reaction: no valid entityId found.');
+      if (reactedUserId)
+        return { userId_reactedUserId: { userId, reactedUserId } };
     }
 
     const reactionPromises = reactions.map(async (reaction) => {
@@ -387,6 +389,7 @@ export class DatabaseService extends PrismaClient<
           bookId: reaction.bookId,
           authorId: reaction.authorId,
           quoteId: reaction.quoteId,
+          reactedUserId: reaction.reactedUserId,
           type: reaction.type,
           entity: reaction.entity,
           favorite: reaction.favorite,

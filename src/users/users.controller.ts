@@ -34,7 +34,7 @@ export class UsersController {
 
   @Get('me')
   getMe(@GetUser() user: User) {
-    return user;
+    return this.usersService.findMe(user);
   }
   @UseGuards(AdminGuard)
   @Get() // GET /users or /users?role=value
