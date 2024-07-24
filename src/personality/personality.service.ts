@@ -30,9 +30,6 @@ export class PersonalityService {
     };
 
     if (entities) {
-      // console.log(entities);
-      // // console.log(entities.split(','));
-      // return;
       const personalities = await this.databaseService.personality.findMany({
         where: {
           OR: entities.map((entity) => ({
@@ -73,6 +70,11 @@ export class PersonalityService {
             ? {
                 include: {
                   personality: true,
+                  reactedBy: {
+                    include: {
+                      user: true,
+                    },
+                  },
                 },
               }
             : false,
@@ -90,6 +92,7 @@ export class PersonalityService {
       const sortedPersonalitiesWithDistances = personalitiesWithDistances.sort(
         (a, b) => a.distance - b.distance,
       );
+
       return sortedPersonalitiesWithDistances.slice(skip, skip + take);
     }
 

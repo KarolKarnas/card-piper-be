@@ -10,6 +10,8 @@ import {
   HttpCode,
   HttpStatus,
   Query,
+  ParseBoolPipe,
+  ParseIntPipe,
   // ParseIntPipe,
 } from '@nestjs/common';
 import { ReactionService } from './reaction.service';
@@ -37,16 +39,18 @@ export class ReactionController {
     return this.reactionService.remove(Number(id));
   }
 
-  @Get('user/:userId')
-  findAllReactions(
-    @Param('userId') userId: string,
+  @Get('user')
+  findAllUserReactions(
+    @Query('userId', ParseIntPipe) userId: number,
+    @Query('all', ParseBoolPipe) all?: boolean,
     @Query('type') type?: ReactionType,
     @Query('entity') entity?: ReactionEntity,
     @Query('favorite') favorite?: string,
     @Query('list') list?: string,
   ) {
-    return this.reactionService.findAllReactions(
+    return this.reactionService.findAllUserReactions(
       Number(userId),
+      all,
       type,
       entity,
       favorite,
