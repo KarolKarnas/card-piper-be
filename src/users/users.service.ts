@@ -16,6 +16,19 @@ import { DatabaseService } from '../database/database.service';
 export class UsersService {
   constructor(private databaseService: DatabaseService) {}
 
+  private determinePersonalityType(personality) {
+    const type = [
+      personality.extroversionIntroversion < 0 ? 'E' : 'I',
+      personality.sensingIntuition < 0 ? 'S' : 'N',
+      personality.thinkingFeeling < 0 ? 'T' : 'F',
+      personality.judgingPerceiving < 0 ? 'J' : 'P',
+    ].join('');
+
+    const flag = personality.assertiveTurbulent < 0 ? 'A' : 'T';
+
+    return `${type}-${flag}`;
+  }
+
   async findAll(role?: UserRole) {
     if (role) {
       const usersWithRoles = await this.databaseService.user.findMany({
@@ -149,8 +162,9 @@ export class UsersService {
       }
     }
 
+    const personalityType = this.determinePersonalityType(userMe.personality);
     // console.log(reactionTotals);
-    console.log(latestReactions);
+    // console.log(latestReactions);
 
     return {
       id: userMe.id,
@@ -161,7 +175,35 @@ export class UsersService {
       personality: userMe.personality,
       total_reaction: reactionTotals,
       latest_reaction: latestReactions,
+      personalityType: personalityType,
+      darkTheme: userMe.darkTheme,
     };
+  }
+
+  async updateMe(user: User, darkTheme?: boolean) {
+    const userMe = await this.databaseService.user.findUnique({
+      where: {
+        email: user.email,
+      },
+    });
+
+    console.log(userMe);
+    console.log(darkTheme);
+    if (!userMe) {
+      throw new NotFoundException('User not found');
+    }
+
+    if (darkTheme === false || darkTheme === true) {
+      await this.databaseService.user.update({
+        where: { email: user.email },
+        data: {
+          darkTheme: darkTheme,
+        },
+      });
+      return { message: `Your dark theme is set to ${darkTheme}` };
+    }
+
+    return null;
   }
 
   // findOne(id: number) {

@@ -312,6 +312,7 @@ export class DatabaseService extends PrismaClient<
           hash,
           role:
             user.email === 'admin@admin.com' ? UserRole.ADMIN : UserRole.USER,
+          darkTheme: false,
           personality: {
             create: zeroPersonality,
           },

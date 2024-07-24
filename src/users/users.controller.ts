@@ -4,13 +4,15 @@ import {
   Delete,
   Get,
   Param,
-  // Patch,
+  Patch,
   // Post,
   Query,
   UseGuards,
   ParseIntPipe,
   HttpCode,
   HttpStatus,
+  Body,
+  ParseBoolPipe,
   // Req,
   // NotFoundException,
   // ForbiddenException,
@@ -36,6 +38,15 @@ export class UsersController {
   getMe(@GetUser() user: User) {
     return this.usersService.findMe(user);
   }
+
+  @Patch('me')
+  updateMe(
+    @GetUser() user: User,
+    @Body('darkTheme', ParseBoolPipe) darkTheme?: boolean,
+  ) {
+    return this.usersService.updateMe(user, darkTheme);
+  }
+
   @UseGuards(AdminGuard)
   @Get() // GET /users or /users?role=value
   findAll(@Query('role') role?: UserRole) {

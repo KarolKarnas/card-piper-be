@@ -40,7 +40,7 @@ export class ReactionController {
   }
 
   @Get('user')
-  findAllReactions(
+  findAllUserReactions(
     @Query('userId', ParseIntPipe) userId: number,
     @Query('all', ParseBoolPipe) all?: boolean,
     @Query('type') type?: ReactionType,
@@ -48,7 +48,7 @@ export class ReactionController {
     @Query('favorite') favorite?: string,
     @Query('list') list?: string,
   ) {
-    return this.reactionService.findAllReactions(
+    return this.reactionService.findAllUserReactions(
       Number(userId),
       all,
       type,

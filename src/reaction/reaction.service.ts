@@ -311,6 +311,8 @@ export class ReactionService {
           },
         });
 
+        console.log(upsertedReactedUser);
+
         if (!upsertedReactedUser) {
           throw new Error(`Reacted User with ID ${reactedUserId} not found.`);
         }
@@ -582,7 +584,7 @@ export class ReactionService {
     }
   }
 
-  async findAllReactions(
+  async findAllUserReactions(
     userId: number,
     all?: boolean,
     type?: ReactionType,

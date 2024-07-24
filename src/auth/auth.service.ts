@@ -33,20 +33,9 @@ export class AuthService {
           email: signupDto.email,
           hash,
           role: UserRole.USER,
+          darkTheme: false,
           personality: {
             create: zeroPersonality,
-          },
-        },
-
-        include: {
-          personality: {
-            select: {
-              assertiveTurbulent: true,
-              extroversionIntroversion: true,
-              judgingPerceiving: true,
-              sensingIntuition: true,
-              thinkingFeeling: true,
-            },
           },
         },
       });
@@ -55,9 +44,6 @@ export class AuthService {
 
       return {
         access_token,
-        email: user.email,
-        role: user.role,
-        personality: user.personality,
       };
     } catch (error) {
       if (error instanceof PrismaClientKnownRequestError) {
@@ -72,17 +58,6 @@ export class AuthService {
   async signin(signupDto: SignupDto) {
     const user = await this.databaseService.user.findUnique({
       where: { email: signupDto.email },
-      include: {
-        personality: {
-          select: {
-            assertiveTurbulent: true,
-            extroversionIntroversion: true,
-            judgingPerceiving: true,
-            sensingIntuition: true,
-            thinkingFeeling: true,
-          },
-        },
-      },
     });
 
     if (!user) {
@@ -99,9 +74,6 @@ export class AuthService {
 
     return {
       access_token,
-      email: user.email,
-      role: user.role,
-      personality: user.personality,
     };
   }
 

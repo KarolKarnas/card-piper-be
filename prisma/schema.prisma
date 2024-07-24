@@ -81,6 +81,8 @@ model User {
   firstName String?
   lastName  String?
 
+  darkTheme Boolean 
+
   favoritedBy FavoriteQuote[]
   reactions   Reaction[]      @relation("ReactionsByUser")
   reactedBy   Reaction[]      @relation("UserReactions")
