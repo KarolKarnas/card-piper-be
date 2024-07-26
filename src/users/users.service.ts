@@ -187,8 +187,6 @@ export class UsersService {
       },
     });
 
-    console.log(userMe);
-    console.log(darkTheme);
     if (!userMe) {
       throw new NotFoundException('User not found');
     }

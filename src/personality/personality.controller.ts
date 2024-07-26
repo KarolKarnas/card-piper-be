@@ -2,21 +2,23 @@ import {
   Controller,
   DefaultValuePipe,
   Get,
+  Param,
   ParseFloatPipe,
   ParseIntPipe,
   Query,
   UseGuards,
+  Body,
+  Post,
 } from '@nestjs/common';
 import { PersonalityService } from './personality.service';
 import { JwtGuard } from '../auth/guard';
-import { ReactionEntity } from '@prisma/client';
+import { Prisma, ReactionEntity } from '@prisma/client';
 import { ParseEntitiesPipe } from '../utils/entities.pipe';
-
+@UseGuards(JwtGuard)
 @Controller('personality')
 export class PersonalityController {
   constructor(private readonly personalityService: PersonalityService) {}
 
-  @UseGuards(JwtGuard)
   @Get()
   findAll(
     @Query('skip', new DefaultValuePipe(0), ParseIntPipe) skip?: number,
@@ -44,6 +46,25 @@ export class PersonalityController {
       thinkingFeeling,
       entity,
       entities,
+    );
+  }
+
+  // @Get(':id')
+  // findAllPersonalityReactions(
+  //   @Param('id', ParseIntPipe) id: number,
+  //   @Query('entity') entity?: ReactionEntity,
+  // ) {
+  //   return this.personalityService.findAllPersonalityReactions(id, entity);
+  // }
+
+  @Post(':id/reaction')
+  createPersonalityReaction(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() createReactionDto: Prisma.ReactionUncheckedCreateInput,
+  ) {
+    return this.personalityService.createPersonalityReaction(
+      id,
+      createReactionDto,
     );
   }
 }
