@@ -1,11 +1,15 @@
 import { Injectable } from '@nestjs/common';
 import { DatabaseService } from '../database/database.service';
+import { ReactionService } from '../reaction/reaction.service';
 import { calculateEuclideanDistance } from '../utils';
-import { ReactionEntity } from '@prisma/client';
+import { Prisma, ReactionEntity } from '@prisma/client';
 
 @Injectable()
 export class PersonalityService {
-  constructor(private readonly databaseService: DatabaseService) {}
+  constructor(
+    private readonly databaseService: DatabaseService,
+    private readonly reactionService: ReactionService,
+  ) {}
 
   async findAll(
     skip: number,
@@ -42,6 +46,11 @@ export class PersonalityService {
                 include: {
                   author: true,
                   characters: true,
+                  reactions: {
+                    include: {
+                      user: true,
+                    },
+                  },
                 },
               }
             : false,
@@ -56,6 +65,11 @@ export class PersonalityService {
             ? {
                 include: {
                   books: true,
+                  reactions: {
+                    include: {
+                      user: true,
+                    },
+                  },
                 },
               }
             : false,
@@ -70,6 +84,19 @@ export class PersonalityService {
             ? {
                 include: {
                   personality: true,
+                  reactions: {
+                    include: {
+                      book: true,
+                      author: true,
+                      quote: true,
+                      character: true,
+                      reactedUser: true,
+                    },
+                    orderBy: {
+                      updatedAt: 'desc',
+                    },
+                    take: 10,
+                  },
                   reactedBy: {
                     include: {
                       user: true,
@@ -110,7 +137,7 @@ export class PersonalityService {
           user: entity === ReactionEntity.USER,
         },
       });
-      // console.log(personalities);
+
       const personalitiesWithDistances = personalities.map((personality) => {
         const distance = calculateEuclideanDistance(
           userPersonality,
@@ -124,5 +151,216 @@ export class PersonalityService {
       );
       return sortedPersonalitiesWithDistances.slice(skip, skip + take);
     }
+  }
+
+  // unused
+  // async findAllPersonalityReactions(id: number, entity?: ReactionEntity) {
+  //   try {
+  //     const includeClause: Prisma.PersonalityInclude = {
+  //       book:
+  //         entity === ReactionEntity.BOOK || !entity
+  //           ? {
+  //               select: {
+  //                 reactions: {
+  //                   select: {
+  //                     id: true,
+  //                     createdAt: true,
+  //                     updatedAt: true,
+  //                     type: true,
+  //                     user: {
+  //                       select: {
+  //                         email: true,
+  //                       },
+  //                     },
+  //                   },
+  //                 },
+  //               },
+  //             }
+  //           : false,
+  //       author:
+  //         entity === ReactionEntity.AUTHOR || !entity
+  //           ? {
+  //               select: {
+  //                 reactions: {
+  //                   select: {
+  //                     id: true,
+  //                     createdAt: true,
+  //                     updatedAt: true,
+  //                     type: true,
+  //                     user: {
+  //                       select: {
+  //                         email: true,
+  //                       },
+  //                     },
+  //                   },
+  //                 },
+  //               },
+  //             }
+  //           : false,
+  //       quote:
+  //         entity === ReactionEntity.QUOTE || !entity
+  //           ? {
+  //               select: {
+  //                 reactions: {
+  //                   select: {
+  //                     id: true,
+  //                     createdAt: true,
+  //                     updatedAt: true,
+  //                     type: true,
+  //                     user: {
+  //                       select: {
+  //                         email: true,
+  //                       },
+  //                     },
+  //                   },
+  //                 },
+  //               },
+  //             }
+  //           : false,
+  //       character:
+  //         entity === ReactionEntity.CHARACTER || !entity
+  //           ? {
+  //               select: {
+  //                 reactions: {
+  //                   select: {
+  //                     id: true,
+  //                     createdAt: true,
+  //                     updatedAt: true,
+  //                     type: true,
+  //                     user: {
+  //                       select: {
+  //                         email: true,
+  //                       },
+  //                     },
+  //                   },
+  //                 },
+  //               },
+  //             }
+  //           : false,
+  //       user:
+  //         entity === ReactionEntity.USER || !entity
+  //           ? {
+  //               select: {
+  //                 reactions: {
+  //                   select: {
+  //                     id: true,
+  //                     createdAt: true,
+  //                     updatedAt: true,
+  //                     type: true,
+  //                     user: {
+  //                       select: {
+  //                         email: true,
+  //                       },
+  //                     },
+  //                   },
+  //                 },
+  //               },
+  //             }
+  //           : false,
+  //     };
+
+  //     const whereClause: Prisma.PersonalityWhereUniqueInput = {
+  //       id: id,
+  //     };
+
+  //     const personality = await this.databaseService.personality.findUnique({
+  //       where: whereClause,
+  //       include: includeClause,
+  //     });
+
+  //     return personality;
+  //   } catch (error) {
+  //     console.log('Error fetching reactions', error);
+  //     throw error;
+  //   }
+  // }
+
+  async createPersonalityReaction(
+    id: number,
+    createReactionDto: Prisma.ReactionUncheckedCreateInput,
+  ) {
+    await this.reactionService.create(createReactionDto);
+
+    const { entity } = createReactionDto;
+
+    const updatedPersonality =
+      await this.databaseService.personality.findUnique({
+        where: {
+          id: id,
+        },
+        include: {
+          book:
+            entity === ReactionEntity.BOOK
+              ? {
+                  include: {
+                    author: true,
+                    characters: true,
+                    reactions: {
+                      include: {
+                        user: true,
+                      },
+                    },
+                  },
+                }
+              : false,
+          quote:
+            entity === ReactionEntity.QUOTE
+              ? {
+                  include: {
+                    author: true,
+                  },
+                }
+              : false,
+          author:
+            entity === ReactionEntity.AUTHOR
+              ? {
+                  include: {
+                    books: true,
+                    reactions: {
+                      include: {
+                        user: true,
+                      },
+                    },
+                  },
+                }
+              : false,
+          character:
+            entity === ReactionEntity.CHARACTER
+              ? {
+                  include: {
+                    books: true,
+                  },
+                }
+              : false,
+          user:
+            entity === ReactionEntity.USER
+              ? {
+                  include: {
+                    personality: true,
+                    reactions: {
+                      include: {
+                        book: true,
+                        author: true,
+                        quote: true,
+                        character: true,
+                        reactedUser: true,
+                      },
+                      orderBy: {
+                        updatedAt: 'desc',
+                      },
+                      take: 10,
+                    },
+                    reactedBy: {
+                      include: {
+                        user: true,
+                      },
+                    },
+                  },
+                }
+              : false,
+        },
+      });
+
+    return updatedPersonality;
   }
 }
