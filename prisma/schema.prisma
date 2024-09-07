@@ -160,6 +160,7 @@ enum UserRole {
 enum ReactionType {
   LOVE
   LIKE
+  MEH
   DISLIKE
   HATE
 }

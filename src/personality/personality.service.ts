@@ -58,6 +58,15 @@ export class PersonalityService {
             ? {
                 include: {
                   author: true,
+                  reactions: {
+                    include: {
+                      user: {
+                        select: {
+                          email: true,
+                        },
+                      },
+                    },
+                  },
                 },
               }
             : false,
@@ -67,7 +76,11 @@ export class PersonalityService {
                   books: true,
                   reactions: {
                     include: {
-                      user: true,
+                      user: {
+                        select: {
+                          email: true,
+                        },
+                      },
                     },
                   },
                 },
@@ -77,6 +90,15 @@ export class PersonalityService {
             ? {
                 include: {
                   books: true,
+                  reactions: {
+                    include: {
+                      user: {
+                        select: {
+                          email: true,
+                        },
+                      },
+                    },
+                  },
                 },
               }
             : false,
@@ -308,6 +330,11 @@ export class PersonalityService {
               ? {
                   include: {
                     author: true,
+                    reactions: {
+                      include: {
+                        user: true,
+                      },
+                    },
                   },
                 }
               : false,
@@ -329,6 +356,11 @@ export class PersonalityService {
               ? {
                   include: {
                     books: true,
+                    reactions: {
+                      include: {
+                        user: true,
+                      },
+                    },
                   },
                 }
               : false,
