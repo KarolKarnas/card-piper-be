@@ -81,13 +81,13 @@ export class UsersService {
     }
 
     const reactionTotals = {
-      TOTAL: userMe.reactions.length,
       [ReactionEntity.AUTHOR]: {
         TOTAL: 0,
         [ReactionType.LOVE]: 0,
         [ReactionType.LIKE]: 0,
         [ReactionType.DISLIKE]: 0,
         [ReactionType.HATE]: 0,
+        [ReactionType.MEH]: 0,
       },
       [ReactionEntity.BOOK]: {
         TOTAL: 0,
@@ -95,6 +95,7 @@ export class UsersService {
         [ReactionType.LIKE]: 0,
         [ReactionType.DISLIKE]: 0,
         [ReactionType.HATE]: 0,
+        [ReactionType.MEH]: 0,
       },
       [ReactionEntity.QUOTE]: {
         TOTAL: 0,
@@ -102,6 +103,7 @@ export class UsersService {
         [ReactionType.LIKE]: 0,
         [ReactionType.DISLIKE]: 0,
         [ReactionType.HATE]: 0,
+        [ReactionType.MEH]: 0,
       },
       [ReactionEntity.CHARACTER]: {
         TOTAL: 0,
@@ -109,6 +111,7 @@ export class UsersService {
         [ReactionType.LIKE]: 0,
         [ReactionType.DISLIKE]: 0,
         [ReactionType.HATE]: 0,
+        [ReactionType.MEH]: 0,
       },
       [ReactionEntity.USER]: {
         TOTAL: 0,
@@ -116,6 +119,7 @@ export class UsersService {
         [ReactionType.LIKE]: 0,
         [ReactionType.DISLIKE]: 0,
         [ReactionType.HATE]: 0,
+        [ReactionType.MEH]: 0,
       },
     };
 
@@ -125,30 +129,35 @@ export class UsersService {
         [ReactionType.LIKE]: [],
         [ReactionType.DISLIKE]: [],
         [ReactionType.HATE]: [],
+        [ReactionType.MEH]: [],
       },
       [ReactionEntity.BOOK]: {
         [ReactionType.LOVE]: [],
         [ReactionType.LIKE]: [],
         [ReactionType.DISLIKE]: [],
         [ReactionType.HATE]: [],
+        [ReactionType.MEH]: [],
       },
       [ReactionEntity.QUOTE]: {
         [ReactionType.LOVE]: [],
         [ReactionType.LIKE]: [],
         [ReactionType.DISLIKE]: [],
         [ReactionType.HATE]: [],
+        [ReactionType.MEH]: [],
       },
       [ReactionEntity.CHARACTER]: {
         [ReactionType.LOVE]: [],
         [ReactionType.LIKE]: [],
         [ReactionType.DISLIKE]: [],
         [ReactionType.HATE]: [],
+        [ReactionType.MEH]: [],
       },
       [ReactionEntity.USER]: {
         [ReactionType.LOVE]: [],
         [ReactionType.LIKE]: [],
         [ReactionType.DISLIKE]: [],
         [ReactionType.HATE]: [],
+        [ReactionType.MEH]: [],
       },
     };
 
@@ -157,9 +166,9 @@ export class UsersService {
       reactionTotals[entity].TOTAL += 1;
       reactionTotals[entity][type] += 1;
 
-      if (latestReactions[entity][type].length < 3) {
-        latestReactions[entity][type].push(reaction);
-      }
+      // if (latestReactions[entity][type].length < 3) {
+      latestReactions[entity][type].push(reaction);
+      // }
     }
 
     const personalityType = this.determinePersonalityType(userMe.personality);
@@ -175,6 +184,7 @@ export class UsersService {
       personality: userMe.personality,
       total_reaction: reactionTotals,
       latest_reaction: latestReactions,
+      total_reaction_num: userMe.reactions.length,
       personalityType: personalityType,
       darkTheme: userMe.darkTheme,
     };
