@@ -15,6 +15,7 @@ import { BooksModule } from './books/books.module';
 import { ReactionModule } from './reaction/reaction.module';
 import { CharacterModule } from './character/character.module';
 import { PersonalityModule } from './personality/personality.module';
+import { DatabaseService } from './database/database.service';
 
 @Module({
   imports: [
@@ -40,6 +41,7 @@ import { PersonalityModule } from './personality/personality.module';
   controllers: [AppController],
   providers: [
     AppService,
+    DatabaseService,
     {
       provide: APP_GUARD,
       useClass: ThrottlerGuard,
