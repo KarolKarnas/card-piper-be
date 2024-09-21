@@ -33,7 +33,7 @@ export class AuthService {
           email: signupDto.email,
           hash,
           role: UserRole.USER,
-          darkTheme: false,
+          darkTheme: true,
           personality: {
             create: zeroPersonality,
           },
