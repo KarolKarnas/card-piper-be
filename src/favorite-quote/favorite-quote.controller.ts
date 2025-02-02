@@ -3,13 +3,11 @@ import {
   Get,
   Post,
   Body,
-  // Patch,
   Param,
   Delete,
   UseGuards,
   HttpCode,
   HttpStatus,
-  // ParseIntPipe,
 } from '@nestjs/common';
 import { FavoriteQuoteService } from './favorite-quote.service';
 import { Prisma } from '@prisma/client';
@@ -27,11 +25,6 @@ export class FavoriteQuoteController {
     return this.favoriteQuoteService.create(createFavoriteQuoteDto);
   }
 
-  // @Get(':id')
-  // findOne(@Param('id') id: string) {
-  //   return this.favoriteQuoteService.findOne(Number(id));
-  // }
-
   @HttpCode(HttpStatus.NO_CONTENT)
   @Delete(':id')
   remove(@Param('id') id: string) {
@@ -47,12 +40,4 @@ export class FavoriteQuoteController {
   findAllUsers(@Param('quoteId') quoteId: number) {
     return this.favoriteQuoteService.findAllUsers(Number(quoteId));
   }
-
-  // @Patch(':id')
-  // update(
-  //   @Param('id') id: string,
-  //   @Body() updateFavoriteQuoteDto: UpdateFavoriteQuoteDto,
-  // ) {
-  //   return this.favoriteQuoteService.update(+id, updateFavoriteQuoteDto);
-  // }
 }

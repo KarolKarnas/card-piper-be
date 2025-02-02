@@ -2,6 +2,11 @@ import { ConflictException, Injectable } from '@nestjs/common';
 import { DatabaseService } from '../database/database.service';
 import { Prisma, ReactionType, ReactionEntity } from '@prisma/client';
 
+const LOVE_HATE_MODIFIER = 0.2;
+const LIKE_DISLIKE_MODIFIER = 0.1;
+const FAVORITE_MODIFIER = 0.5;
+const LIST_MODIFIER = 0.3;
+
 const removePersonalityCalc = (
   updatedPersonality: Prisma.PersonalityCreateInput,
   itemPersonality: Prisma.PersonalityCreateInput,
@@ -12,51 +17,51 @@ const removePersonalityCalc = (
   switch (existingReaction.type) {
     case ReactionType.LOVE:
       updatedPersonality.extroversionIntroversion -=
-        itemPersonality.extroversionIntroversion * 0.2;
+        itemPersonality.extroversionIntroversion * LOVE_HATE_MODIFIER;
       updatedPersonality.sensingIntuition -=
-        itemPersonality.sensingIntuition * 0.2;
+        itemPersonality.sensingIntuition * LOVE_HATE_MODIFIER;
       updatedPersonality.thinkingFeeling -=
-        itemPersonality.thinkingFeeling * 0.2;
+        itemPersonality.thinkingFeeling * LOVE_HATE_MODIFIER;
       updatedPersonality.judgingPerceiving -=
-        itemPersonality.judgingPerceiving * 0.2;
+        itemPersonality.judgingPerceiving * LOVE_HATE_MODIFIER;
       updatedPersonality.assertiveTurbulent -=
-        itemPersonality.assertiveTurbulent * 0.2;
+        itemPersonality.assertiveTurbulent * LOVE_HATE_MODIFIER;
       break;
     case ReactionType.LIKE:
       updatedPersonality.extroversionIntroversion -=
-        itemPersonality.extroversionIntroversion * 0.1;
+        itemPersonality.extroversionIntroversion * LIKE_DISLIKE_MODIFIER;
       updatedPersonality.sensingIntuition -=
-        itemPersonality.sensingIntuition * 0.1;
+        itemPersonality.sensingIntuition * LIKE_DISLIKE_MODIFIER;
       updatedPersonality.thinkingFeeling -=
-        itemPersonality.thinkingFeeling * 0.1;
+        itemPersonality.thinkingFeeling * LIKE_DISLIKE_MODIFIER;
       updatedPersonality.judgingPerceiving -=
-        itemPersonality.judgingPerceiving * 0.1;
+        itemPersonality.judgingPerceiving * LIKE_DISLIKE_MODIFIER;
       updatedPersonality.assertiveTurbulent -=
-        itemPersonality.assertiveTurbulent * 0.1;
+        itemPersonality.assertiveTurbulent * LIKE_DISLIKE_MODIFIER;
       break;
     case ReactionType.DISLIKE:
       updatedPersonality.extroversionIntroversion +=
-        itemPersonality.extroversionIntroversion * 0.1;
+        itemPersonality.extroversionIntroversion * LIKE_DISLIKE_MODIFIER;
       updatedPersonality.sensingIntuition +=
-        itemPersonality.sensingIntuition * 0.1;
+        itemPersonality.sensingIntuition * LIKE_DISLIKE_MODIFIER;
       updatedPersonality.thinkingFeeling +=
-        itemPersonality.thinkingFeeling * 0.1;
+        itemPersonality.thinkingFeeling * LIKE_DISLIKE_MODIFIER;
       updatedPersonality.judgingPerceiving +=
-        itemPersonality.judgingPerceiving * 0.1;
+        itemPersonality.judgingPerceiving * LIKE_DISLIKE_MODIFIER;
       updatedPersonality.assertiveTurbulent +=
-        itemPersonality.assertiveTurbulent * 0.1;
+        itemPersonality.assertiveTurbulent * LIKE_DISLIKE_MODIFIER;
       break;
     case ReactionType.HATE:
       updatedPersonality.extroversionIntroversion +=
-        itemPersonality.extroversionIntroversion * 0.2;
+        itemPersonality.extroversionIntroversion * LOVE_HATE_MODIFIER;
       updatedPersonality.sensingIntuition +=
-        itemPersonality.sensingIntuition * 0.2;
+        itemPersonality.sensingIntuition * LOVE_HATE_MODIFIER;
       updatedPersonality.thinkingFeeling +=
-        itemPersonality.thinkingFeeling * 0.2;
+        itemPersonality.thinkingFeeling * LOVE_HATE_MODIFIER;
       updatedPersonality.judgingPerceiving +=
-        itemPersonality.judgingPerceiving * 0.2;
+        itemPersonality.judgingPerceiving * LOVE_HATE_MODIFIER;
       updatedPersonality.assertiveTurbulent +=
-        itemPersonality.assertiveTurbulent * 0.2;
+        itemPersonality.assertiveTurbulent * LOVE_HATE_MODIFIER;
       break;
     default:
       break;
@@ -64,26 +69,28 @@ const removePersonalityCalc = (
 
   if (existingReaction.favorite === true) {
     updatedPersonality.extroversionIntroversion -=
-      itemPersonality.extroversionIntroversion * 0.5;
+      itemPersonality.extroversionIntroversion * FAVORITE_MODIFIER;
     updatedPersonality.sensingIntuition -=
-      itemPersonality.sensingIntuition * 0.5;
-    updatedPersonality.thinkingFeeling -= itemPersonality.thinkingFeeling * 0.5;
+      itemPersonality.sensingIntuition * FAVORITE_MODIFIER;
+    updatedPersonality.thinkingFeeling -=
+      itemPersonality.thinkingFeeling * FAVORITE_MODIFIER;
     updatedPersonality.judgingPerceiving -=
-      itemPersonality.judgingPerceiving * 0.5;
+      itemPersonality.judgingPerceiving * FAVORITE_MODIFIER;
     updatedPersonality.assertiveTurbulent -=
-      itemPersonality.assertiveTurbulent * 0.5;
+      itemPersonality.assertiveTurbulent * FAVORITE_MODIFIER;
   }
 
   if (existingReaction.list === true) {
     updatedPersonality.extroversionIntroversion -=
-      itemPersonality.extroversionIntroversion * 0.3;
+      itemPersonality.extroversionIntroversion * LIST_MODIFIER;
     updatedPersonality.sensingIntuition -=
-      itemPersonality.sensingIntuition * 0.3;
-    updatedPersonality.thinkingFeeling -= itemPersonality.thinkingFeeling * 0.3;
+      itemPersonality.sensingIntuition * LIST_MODIFIER;
+    updatedPersonality.thinkingFeeling -=
+      itemPersonality.thinkingFeeling * LIST_MODIFIER;
     updatedPersonality.judgingPerceiving -=
-      itemPersonality.judgingPerceiving * 0.3;
+      itemPersonality.judgingPerceiving * LIST_MODIFIER;
     updatedPersonality.assertiveTurbulent -=
-      itemPersonality.assertiveTurbulent * 0.3;
+      itemPersonality.assertiveTurbulent * LIST_MODIFIER;
   }
 
   [
@@ -137,7 +144,7 @@ export class ReactionService {
       let itemPersonality: Prisma.PersonalityCreateInput;
       let reaction: Prisma.ReactionUncheckedCreateInput;
       let existingReaction: Prisma.ReactionUncheckedCreateInput;
-      //
+
       const updateFields: Prisma.ReactionUncheckedUpdateInput = {};
       if (type) updateFields.type = type;
       if (favorite !== undefined) updateFields.favorite = favorite;
@@ -164,7 +171,6 @@ export class ReactionService {
           create: { userId, quoteId, type, entity, favorite, list },
         });
 
-        // Fetch details of the quote for which the reaction is being created
         const upsertedQuote = await this.databaseService.quote.findUnique({
           where: {
             id: quoteId,
@@ -426,14 +432,8 @@ export class ReactionService {
         },
       });
 
-      // console.log('itemPersonality', itemPersonality);
-      // console.log('updatedPersonality', updatedPersonality);
-      // console.log('updatedUser', updatedUser);
-
       return {
         reaction: reaction,
-        // updatedPersonality: updatedPersonality,
-        // userPersonality: user.personality,
       };
     } catch (error) {
       if (error instanceof Prisma.PrismaClientKnownRequestError) {
@@ -654,38 +654,4 @@ export class ReactionService {
       throw error;
     }
   }
-
-  // async findAllUsers(quoteId: number) {
-  //   try {
-  //     return await this.databaseService.favoriteQuote.findMany({
-  //       where: {
-  //         quoteId: quoteId,
-  //       },
-  //       include: {
-  //         user: {
-  //           select: {
-  //             id: true,
-  //             firstName: true,
-  //             lastName: true,
-  //           },
-  //         },
-  //       },
-  //     });
-  //   } catch (error) {
-  //     console.log('Error fetching favorited quotes:', error);
-  //     throw error;
-  //   }
-  // }
-
-  // findOne(id: number) {
-  //   return this.databaseService.favoriteQuote.findUnique({
-  //     where: {
-  //       id: id,
-  //     },
-  //   });
-  // }
-
-  // update(id: number, updateFavoriteQuoteDto: UpdateFavoriteQuoteDto) {
-  //   return `This action updates a #${id} favoriteQuote`;
-  // }
 }

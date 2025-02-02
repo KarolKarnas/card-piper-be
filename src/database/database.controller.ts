@@ -1,11 +1,10 @@
-import { Body, Controller, Delete, Post } from '@nestjs/common';
+import { Body, Controller, Delete, Post, UseGuards } from '@nestjs/common';
 import { DatabaseService } from './database.service';
 import { PopulateData } from './database.types';
-// import { AdminGuard } from '../auth/guard';
+import { AdminGuard } from '../auth/guard';
 
-// @UseGuards(AdminGuard)
-
-@Controller('database') // /users
+@UseGuards(AdminGuard) //Only users with Admin role can perform db actions
+@Controller('database')
 export class DatabaseController {
   constructor(private readonly databaseService: DatabaseService) {}
 

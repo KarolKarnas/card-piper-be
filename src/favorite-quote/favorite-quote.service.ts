@@ -11,7 +11,6 @@ export class FavoriteQuoteService {
   ) {
     try {
       const favoriteQuote = await this.databaseService.favoriteQuote.create({
-        // data: createFavoriteQuoteDto,
         data: {
           user: {
             connect: {
@@ -94,16 +93,4 @@ export class FavoriteQuoteService {
       throw error;
     }
   }
-
-  // findOne(id: number) {
-  //   return this.databaseService.favoriteQuote.findUnique({
-  //     where: {
-  //       id: id,
-  //     },
-  //   });
-  // }
-
-  // update(id: number, updateFavoriteQuoteDto: UpdateFavoriteQuoteDto) {
-  //   return `This action updates a #${id} favoriteQuote`;
-  // }
 }

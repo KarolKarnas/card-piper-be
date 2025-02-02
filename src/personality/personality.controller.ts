@@ -49,14 +49,6 @@ export class PersonalityController {
     );
   }
 
-  // @Get(':id')
-  // findAllPersonalityReactions(
-  //   @Param('id', ParseIntPipe) id: number,
-  //   @Query('entity') entity?: ReactionEntity,
-  // ) {
-  //   return this.personalityService.findAllPersonalityReactions(id, entity);
-  // }
-
   @Post(':id/reaction')
   createPersonalityReaction(
     @Param('id', ParseIntPipe) id: number,
