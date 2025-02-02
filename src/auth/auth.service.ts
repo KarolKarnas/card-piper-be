@@ -17,7 +17,6 @@ export class AuthService {
 
   async signup(signupDto: SignupDto) {
     const hash = await argon2.hash(signupDto.password);
-    // const adminSecret = Boolean(this.config.get('ADMIN_SECRET'));
 
     try {
       const zeroPersonality = {

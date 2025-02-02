@@ -166,14 +166,10 @@ export class UsersService {
       reactionTotals[entity].TOTAL += 1;
       reactionTotals[entity][type] += 1;
 
-      // if (latestReactions[entity][type].length < 3) {
       latestReactions[entity][type].push(reaction);
-      // }
     }
 
     const personalityType = this.determinePersonalityType(userMe.personality);
-    // console.log(reactionTotals);
-    // console.log(latestReactions);
 
     return {
       id: userMe.id,
@@ -213,18 +209,6 @@ export class UsersService {
 
     return null;
   }
-
-  // findOne(id: number) {
-  //   const user = this.users.find((user) => user.id === id);
-
-  //   if (!user) throw new NotFoundException('User Not Found');
-
-  //   return user;
-  // }
-
-  // async create(createUserDto: Prisma.UserCreateInput) {
-  //   return this.databaseService.user.create({ data: createUserDto });
-  // }
 
   async update(id: number, updatedUserDto: Prisma.UserCreateInput) {
     return this.databaseService.user.update({

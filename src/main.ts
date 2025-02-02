@@ -11,7 +11,6 @@ async function bootstrap() {
   app.useGlobalFilters(new AllExceptionsFilter(httpAdapter));
   app.useGlobalPipes(
     new ValidationPipe({
-      // forbidUnknownValues: false,
       whitelist: true,
     }),
   );

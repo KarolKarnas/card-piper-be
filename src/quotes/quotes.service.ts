@@ -22,9 +22,6 @@ export class QuotesService {
     sensingIntuition: number,
     thinkingFeeling: number,
   ) {
-    // console.log(userPersonality);
-    // if (skip === 0 && take === 0) return this.databaseService.quote.findMany();
-
     const userPersonality = {
       assertiveTurbulent,
       extroversionIntroversion,
@@ -53,15 +50,12 @@ export class QuotesService {
         return { ...quote, distance };
       });
 
-      // Sort the quotes based on distance
       const sortedQuotesWithDistances = quotesWithDistances.sort(
         (a, b) => a.distance - b.distance,
       );
 
       return sortedQuotesWithDistances.slice(skip, skip + take);
     }
-
-    // return this.databaseService.quote.findMany({ skip: skip, take: take });
   }
 
   async findOne(id: number) {

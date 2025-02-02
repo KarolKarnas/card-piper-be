@@ -3,7 +3,6 @@ import {
   Get,
   Post,
   Body,
-  // Patch,
   Param,
   Delete,
   UseGuards,
@@ -12,7 +11,6 @@ import {
   Query,
   ParseBoolPipe,
   ParseIntPipe,
-  // ParseIntPipe,
 } from '@nestjs/common';
 import { ReactionService } from './reaction.service';
 import { Prisma, ReactionType, ReactionEntity } from '@prisma/client';
@@ -27,11 +25,6 @@ export class ReactionController {
   create(@Body() createReactionDto: Prisma.ReactionUncheckedCreateInput) {
     return this.reactionService.create(createReactionDto);
   }
-
-  // @Get(':id')
-  // findOne(@Param('id') id: string) {
-  //   return this.favoriteQuoteService.findOne(Number(id));
-  // }
 
   @HttpCode(HttpStatus.NO_CONTENT)
   @Delete(':id')
@@ -57,17 +50,4 @@ export class ReactionController {
       list,
     );
   }
-
-  // @Get('quote/:quoteId')
-  // findAllUsers(@Param('quoteId') quoteId: number) {
-  //   return this.reactionService.findAllUsers(Number(quoteId));
-  // }
-
-  // @Patch(':id')
-  // update(
-  //   @Param('id') id: string,
-  //   @Body() updateFavoriteQuoteDto: UpdateFavoriteQuoteDto,
-  // ) {
-  //   return this.favoriteQuoteService.update(+id, updateFavoriteQuoteDto);
-  // }
 }
